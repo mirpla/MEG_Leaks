@@ -331,7 +331,7 @@ def import_ER(date):
     
 def coreg_subs(subs):
     script_dir  = Path(__file__).resolve() # Location of current scripts
-    base_path   = script_dir.parent.parent.parent
+    base_path   = script_dir.parent.parent.parent.parent
     raw_path    = Path(r'\\raw\Project0407')
     
     ses_name    = 'subject number'

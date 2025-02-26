@@ -16,7 +16,7 @@ def apply_ICA(rstate):
     # %% Remove ICA Components:
     # %% Set up Paths 
     script_dir      = Path(__file__).resolve() # Location of current scripts
-    base_path       = script_dir.parent.parent.parent # Root folder
+    base_path       = script_dir.parent.parent.parent.parent # Root folder
     data_path       = base_path / 'Data' # Folder containing the Data
     ica_comp_path   = data_path / 'ICA_Components.csv'
     

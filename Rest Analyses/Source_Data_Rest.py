@@ -19,7 +19,7 @@ def make_source_rest(sub, ses, src_d, src_l, src_f):
     base_path       = script_dir.parent.parent.parent # Root folder
     data_path       = base_path / 'Data' 
     ER_path         = data_path / 'empty-room'
-     = pd.read_csv[data_path / 'Subject_Information.csv'] 
+    data = pd.read_csv[data_path / 'Subject_Information.csv'] 
     
     sub_num = int(sub.split('-')[1])
     

@@ -20,11 +20,11 @@ from meg_analysis.Tools.Audio_Read import export_meg_audio
 # Import the Raw MEG data and MRI's and perform Tsss and other first run preprocessing 
 
 # MAKE SURE TO RUN AS ADMINISTRATOR! 
-sub_codes = ['53','54','57']  # 17 24 still need 1 and 9, 9 has a naming problem
+sub_codes = ['55']  # 17 24 still need 1 and 9, 9 has a naming problem
 Import_Data(sub_codes)
 
 #%%
-subs = ['sub-51'] # 'sub-XX'
+subs = ['sub-57'] # 'sub-XX'
 coreg_subs(subs)
 
 # %% 
@@ -36,8 +36,8 @@ Preprocess_Data()
 # %% 
 # Look at ICA components and write down which ones to exclude in a separate .csv (Data\ICA_Components.csv)
 
-ses = 1 # select session for checking ICA (ses 1 == 0; ses 2 == 1)
-sub = Path('//analyse7/project0407/Data/sub-06') # select the subject folder to look at
+ses = 0 # select session for checking ICA (ses 1 == 0; ses 2 == 1)
+sub = Path('//analyse7/project0407/Data/sub-57') # select the subject folder to look at
 rstate = 100 # select the seed 100 is notchfiltered 97 was not 
 check_ICA_comp(sub, ses, rstate)
 

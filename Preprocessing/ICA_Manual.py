@@ -13,7 +13,7 @@ def check_ICA_comp(sub,ext_ses,rstate):
     
     # %% Paths
     script_dir = Path(__file__).resolve() # Location of current scripts
-    base_path  = script_dir.parent.parent.parent # Root folder
+    base_path  = script_dir.parent.parent.parent.parent # Root folder
     data_path  = base_path / 'Data' # Folder containing the Data
       
     #for sub in sub_folders: # No loop, 

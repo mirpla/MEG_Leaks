@@ -15,7 +15,7 @@ from meg_analysis.Scripts.Preprocessing.Preproc_Functions import block_annotate,
 def Preprocess_Data():
     # %% Set up Paths 
     script_dir = Path(__file__).resolve() # Location of current scripts
-    base_path  = script_dir.parent.parent.parent # Root folder
+    base_path  = script_dir.parent.parent.parent.parent # Root folder
     data_path  = base_path / 'Data' # Folder containing the Data
     
     reg_pattern = re.compile(r'^sub-\d{2}$') # creat regular expression pattern to identify folders of processed subjects
