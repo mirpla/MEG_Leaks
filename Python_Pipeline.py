@@ -53,7 +53,7 @@ apply_ICA(rstate)
 #    start_sub: optional parameter to specify starting subject (format: "XX" where XX is the subject number, e.g., "05")
 #    single_sub: if True, only process the specified start_sub. If False, continue processing subsequent subjects (default: False)
 
-Artifacts_Manual(redo_flag=1, rstate=100, start_sub="26", single_sub=True)
+Artifacts_Manual(redo_flag=1, rstate=100, start_sub="40", single_sub=True)
 
 # %% 
 # Rest analyses:
@@ -72,6 +72,6 @@ fig_imp, fig_exp = process_WL_data(m=0, min_seq_length=2)
 import_ER() # import and process the empty room data to allow for NCM for source localisation, input is the data 'YYMMDD'
 # Events_Fix Careful, running this will rerun all the event files and overwrite the existing ones
 
-meg_file = '//raw/Project0407/sfr27/250204/MEG_2054_WL6.fif'
+meg_file = '//raw/Project0407/eir06/250303/MEG_2058_WL2.fif'
 wav_file = 'C:/Users/mirceav/Desktop/audio.wav'
 export_meg_audio(meg_file, wav_file)
