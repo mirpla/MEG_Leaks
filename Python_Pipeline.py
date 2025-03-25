@@ -3,6 +3,7 @@
 #%autoreload 2
 from pathlib import Path
 from meg_analysis.Scripts.Import.Import_Data import Import_Data
+from meg_analysis.Scripts.Import.fix_MRIs import re_run_BEM
 from meg_analysis.Scripts.Import.Import_Preproc import import_ER, coreg_subs
 from meg_analysis.Scripts.Preprocessing.Preprocess_Data import Preprocess_Data
 #from Scripts.Preprocessing.Preprocess_Data_Artf import Preprocess_Data_Artf
@@ -19,12 +20,13 @@ from meg_analysis.Tools.Audio_Read import export_meg_audio
 #%% 
 # Import the Raw MEG data and MRI's and perform Tsss and other first run preprocessing 
 
-# MAKE SURE TO RUN AS ADMINISTRATOR! 
-sub_codes = ['55']  # 17 24 still need 1 and 9, 9 has a naming problem
+# MAKE SURE TO RUN AS ADMINISTRATOR!
+# give number as string 
+sub_codes = ['56'] # 61  still need 1 and 9, 9 has a naming problem
 Import_Data(sub_codes)
 
 #%%
-subs = ['sub-57'] # 'sub-XX'
+subs = ['sub-56'] # 'sub-XX'
 coreg_subs(subs)
 
 # %% 
@@ -35,9 +37,8 @@ Preprocess_Data()
 
 # %% 
 # Look at ICA components and write down which ones to exclude in a separate .csv (Data\ICA_Components.csv)
-
 ses = 0 # select session for checking ICA (ses 1 == 0; ses 2 == 1)
-sub = Path('//analyse7/project0407/Data/sub-57') # select the subject folder to look at
+sub = Path('//analyse7/project0407/Data/sub-63') # select the subject folder to look at
 rstate = 100 # select the seed 100 is notchfiltered 97 was not 
 check_ICA_comp(sub, ses, rstate)
 
@@ -53,7 +54,7 @@ apply_ICA(rstate)
 #    start_sub: optional parameter to specify starting subject (format: "XX" where XX is the subject number, e.g., "05")
 #    single_sub: if True, only process the specified start_sub. If False, continue processing subsequent subjects (default: False)
 
-Artifacts_Manual(redo_flag=1, rstate=100, start_sub="40", single_sub=True)
+Artifacts_Manual(redo_flag=1, rstate=100, start_sub="63", single_sub=True)
 
 # %% 
 # Rest analyses:
@@ -71,7 +72,11 @@ fig_imp, fig_exp = process_WL_data(m=0, min_seq_length=2)
 # %% Other
 import_ER() # import and process the empty room data to allow for NCM for source localisation, input is the data 'YYMMDD'
 # Events_Fix Careful, running this will rerun all the event files and overwrite the existing ones
-
+#%% Export audio of a specific subject and block to relisten in case of doubts 
 meg_file = '//raw/Project0407/eir06/250303/MEG_2058_WL2.fif'
 wav_file = 'C:/Users/mirceav/Desktop/audio.wav'
 export_meg_audio(meg_file, wav_file)
+
+# %% Change watershed algorithm parameters to fix intersections 
+
+re_run_BEM('sub-56', pre_flood = 10, scale_factor = 0)

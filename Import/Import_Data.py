@@ -25,7 +25,7 @@ def Import_Data(sub_codes):
     
     # check code for sub 12
     ses_name    = 'subject number'
-    ses_n_lbl   = 'session number (1 = seq, 2 = random)' 
+    ses_n_lbl   = 'session number (1 = seq, 2 = control)' 
     hash_id     = 'subject hash'
     ses_dat     = 'session date'
     
@@ -50,8 +50,6 @@ def Import_Data(sub_codes):
         # Do MRI stuff first since it's session independent 
         MakeBoundaryElementModel(mri_path, sub_path )       
         
-        range1 = range(ses_n)
-        range2 = range(1,  ses_n + 1)
     # %%
         for x, sesidx in zip(range(ses_n), range(1,  ses_n + 1)):
             row_ses = rowidx.iloc[x] 
@@ -69,13 +67,13 @@ def Import_Data(sub_codes):
                 filename = txt_file.stem 
                 parts = filename.split('_')
                
-                if len(parts) > 1 and parts[1][1] == str(sesidx):          
-                    destination_file = out_path / "beh" / txt_file.name
+                if len(parts) > 1 and parts[1][1] == str(int(sessions_dum[ses_n_lbl])):          
+                    destination_file = out_path / 'beh' / txt_file.name
                     if not os.path.exists(destination_file):
                         shutil.copy(txt_file, destination_file)
-                        print(f"Copied {txt_file} to {destination_file}")
+                        print(f'Copied {txt_file} to {destination_file}')
                     else:
-                        print(f"{destination_file} already exists")
+                        print(f'{destination_file} already exists')
             
             # %%
             for meg_file in data_meg_path.glob("*.fif"):

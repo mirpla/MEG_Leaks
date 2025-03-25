@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 '''
 View the contents of a processed NII file (for example after segmentation)
+Specifically made to view Michele's NIIs but could be adapted for general use
 '''
 base_folder = 'Z:/Hospital/Michele/'
 # Load the predicted volume

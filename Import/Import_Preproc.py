@@ -335,7 +335,7 @@ def coreg_subs(subs):
     raw_path    = Path(r'\\raw\Project0407')
     
     ses_name    = 'subject number'
-    ses_n_lbl   = 'session number (1 = seq, 2 = random)' 
+    ses_n_lbl   = 'session number (1 = seq, 2 = control)' 
     hash_id     = 'subject hash'
     ses_dat     = 'session date'
     
