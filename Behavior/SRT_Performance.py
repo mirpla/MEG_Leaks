@@ -253,7 +253,7 @@ def srt_import_fit(base_path, fit_limit, sl_window,method='loess',poly_degree=2)
     
     results = {
         'skill_learning':   pd.DataFrame(columns=['subject', 'session', 'block', 'condition', 'skill_learning_value']),
-        'filtered_rts':     pd.DataFrame(),
+        'filtered_rts':     pd.DataFrame(), #pd.DataFrame(columns=['subject_id', 'block', 'random', 'upper_limit', 'lower_limit','error_trials','error_button' , 'error_rt', 'error_value', 'method', 'sequence']),
         'error_rates':      pd.DataFrame(columns=['subject','block', 'error_value', 'total_trials','error_rate'])
     }
     
@@ -267,9 +267,6 @@ def srt_import_fit(base_path, fit_limit, sl_window,method='loess',poly_degree=2)
         raise ValueError(f"Unknown smoothing method: {method}. Choose 'lowess' or 'loess'.")
     
     for subject_id, subject_df in subject_dfs.items():
-        if subject_id == 42: # subject 42 had a hard crash in SRT 
-            continue 
-         
         cond = subject_df['sequence_file'].unique().astype(int)[0] # get the condition 1 = congruent 2 = incongruent
         sub_pos = sub_info.index[sub_info['sub'] == f'sub-{int(subject_id):02d}'].tolist() 
         # For each row, get the RT for the correct button based on target and detect the errors
@@ -324,9 +321,10 @@ def srt_import_fit(base_path, fit_limit, sl_window,method='loess',poly_degree=2)
                     lowess_df['random']         = 0 # 0 = all random; 1 = pre-seq random 2 = post-seq random
                     lowess_df['upper_limit']    = upper_limit
                     lowess_df['lower_limit']    = lower_limit
-                    lowess_df['error_trials']   = block_data['error_button']
-                    lowess_df['error_rt']       = block_data['error_value']
+                    lowess_df['error_trials']   = block_data['error_button'].values
+                    lowess_df['error_rt']       = block_data['error_value'].values
                     lowess_df['method']         = method
+                    lowess_df['target']         = block_data['target'].values
                     
                     # Set MultiIndex to make data more readable
                     lowess_df.set_index(['subject_id', 'block','random'], inplace=True)
@@ -376,9 +374,10 @@ def srt_import_fit(base_path, fit_limit, sl_window,method='loess',poly_degree=2)
                         lowess_df['random']         = dat[0]+1 # 0 = all random; 1 = pre-seq random 2 = post-seq random
                         lowess_df['upper_limit']    = upper_limit_r[dat[0]]
                         lowess_df['lower_limit']    = lower_limit_r[dat[0]]
-                        lowess_df['error_trials']   = random_split[dat[0]]['error_button']
-                        lowess_df['error_rt']       = random_split[dat[0]]['error_value']
+                        lowess_df['error_trials']   = random_split[dat[0]]['error_button'].values
+                        lowess_df['error_rt']       = random_split[dat[0]]['error_value'].values
                         lowess_df['method']         = method
+                        lowess_df['target']         = random_split[dat[0]]['target'].values
                         
                         # Set MultiIndex to make data more readable
                         lowess_df.set_index(['subject_id', 'block','random'], inplace=True)
@@ -386,6 +385,7 @@ def srt_import_fit(base_path, fit_limit, sl_window,method='loess',poly_degree=2)
                         results['filtered_rts'] = pd.concat([results['filtered_rts'], lowess_df], ignore_index=False)
                         results['filtered_rts'] = results['filtered_rts'].sort_index()
                 # Apply filter to sequence data
+                seq_len = len(sequence_data) 
                 if len(sequence_data) > 0:
                     # Prepare data for LOWESS
                     rt_array = sequence_data['correct_rt'].values
@@ -402,12 +402,14 @@ def srt_import_fit(base_path, fit_limit, sl_window,method='loess',poly_degree=2)
                     lowess_df['random']         = 3 # 0 = all random; 1 = pre-seq random 2 = post-seq random 3 = sequence
                     lowess_df['upper_limit']    = upper_limit
                     lowess_df['lower_limit']    = lower_limit
-                    lowess_df['error_trials']   = sequence_data['error_button']
-                    lowess_df['error_rt']       = sequence_data['error_value']
+                    lowess_df['error_trials']   = sequence_data['error_button'].values
+                    lowess_df['error_rt']       = sequence_data['error_value'].values
                     lowess_df['method']         = method
+                    lowess_df['target']         = sequence_data['target'].values
+                    lowess_df['seq_pos']        = np.tile(np.arange(1, 13), seq_len // 12*26)[:seq_len]
                     
                     # Set MultiIndex to make data more readable
-                    lowess_df.set_index(['subject_id', 'block','random'], inplace=True)
+                    lowess_df.set_index(['subject_id', 'block','random',], inplace=True)
                     
                     results['filtered_rts'] = pd.concat([results['filtered_rts'], lowess_df], ignore_index=False) 
                     

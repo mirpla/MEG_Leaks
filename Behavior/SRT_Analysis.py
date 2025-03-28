@@ -2,7 +2,7 @@
 from pathlib import Path
 
 from meg_analysis.Scripts.Behavior.SRT_Performance import srt_import_fit
-from meg_analysis.Scripts.Behavior.SRT_Plots import srt_plot_sl, plot_trial_performance
+from meg_analysis.Scripts.Behavior.SRT_Plots import srt_plot_sl, plot_trial_performance, plot_buttons
 
 # %% Run analysis
 base_path =  Path('Z:/')
@@ -20,9 +20,15 @@ save_path = None # Path to save the figure (if None, the figure is not saved)
 figs = srt_plot_sl( srt_data, base_path, norm, save_path, separate_conditions)
 
 # %% Plot individual SRT performances
-save = False
-sub = None # list of subjects to plot (for example [2,4]) (can be None)
+save = True
+sub = [42] # list of subjects to plot (for example [2,4]) (can be None)
 y_lim = [0, 1] # y-axis limits
 plot_trial_performance(srt_data, base_path, y_lim, sub, save) 
 
 # %% Plot individual buttons 
+# plot individual buttons presses for sequence and random trials. If no Path is given plots are output immediately.
+sub = [42] # list of subjects to plot (for example [2,4]). If None processes all subjects
+use_median  = True # using median or mean  
+plot_buttons(srt_data, base_path, sub, use_median)
+
+# %%
