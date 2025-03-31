@@ -4,6 +4,7 @@ import numpy as np
 import subprocess
 import shutil
 import pandas as pd
+import glob
 import logging
 from pathlib import Path
 from mne.preprocessing import find_bad_channels_maxwell
@@ -288,46 +289,80 @@ def MEG_import_process(file, out, destination_mat):
     
 # %% Import and Process the empty room recording
 
-def import_ER(date):
-    script_dir  = Path(__file__).resolve() # Location of current scripts
-    base_path   = script_dir.parent.parent.parent
+def import_ER(script_dir, date = None):
+    '''
+    import and process the empty room data to allow for NCM for source localisation, input in the 'YYMMDD' format
+    date: str optional
+        'YYMMDD' (e.g., '240927' for 27th September 2024)
+        If not provided, the function will process all unprocessed dates in the folder
+        If date is provided function will proceed to process and overwrite the original if it exists
+    '''
+    #paths
+    base_path   = script_dir.parent.parent.parent 
     data_folder = base_path / 'Data' / 'empty-room'
-    data_file   = data_folder / Path('ER_'+ date +'.fif')
-    out_file    = data_folder / Path('ER_'+ date +'_raw_sss.fif')
-    raw_data = mne.io.read_raw_fif(data_file, preload=True,verbose=False)
-    tools_path = base_path / 'meg_analysis' / 'Tools' 
-      
-    raw_data.info['bads'] = []
+    tools_path  = base_path / 'meg_analysis' / 'Tools' 
     
-    # Import csv with generally known bad channels
-    bads_path = base_path / 'Data' / 'Bad_Channels.csv'  # Replace with your actual file path
-    df = pd.read_csv(bads_path)
-    channel_names = df['Bad_Channels'].tolist()
+    # Check if the date is provided and if the file exists
+    files_to_process = []
+    if date is not None:
+        files_to_process = [data_folder / f'ER_{date}.fif']
+        if not  files_to_process[0].exists():
+            raise FileNotFoundError(f"File not found: {files_to_process[0]}")      
+    else: 
+        # Find all ER_*.fif files that are not already processed files (*_raw_sss.fif)
+        all_er_files = list(data_folder.glob('ER_*.fif'))
+        raw_files = [f for f in all_er_files if '_raw_sss' not in f.name]
+        if not raw_files:
+            print("No empty room files found to process.")
+            return
     
-    raw_data.info['bads'] = channel_names
+        print(f"Found {len(raw_files)} files to potentially process.")
+       
+       # remove the files that have a corresponding _raw_sss file already from the list to avoid overwrite
+        for file in raw_files:     
+            expected_output = file.parent / (file.stem + '_raw_sss.fif')
+            if not expected_output.exists():
+                    files_to_process.append(file)
+        if not files_to_process:
+            print("All empty room files have already been processed.")
+            return
+        print(f"Found {len(files_to_process)} files that need processing.")
+        
+    for file in files_to_process:
+        raw_data    = mne.io.read_raw_fif(file, preload=True,verbose=False)
+        out_file    = data_folder / Path(file.stem +'_raw_sss.fif')
     
-    raw_data_check = raw_data.copy()
-    auto_noisy_chs, auto_flat_chs, auto_scores = find_bad_channels_maxwell(raw_data_check, return_scores=True, verbose = True,coord_frame='meg') 
-    
-    bads = list(set(raw_data.info['bads'] + auto_noisy_chs + auto_flat_chs))
-    raw_data.info['bads'] = bads
-    
-    raw_data_sss = mne.preprocessing.maxwell_filter(
-       raw_data, 
-       st_duration=50, 
-       st_correlation=.9, 
-       coord_frame='meg', 
-       destination= None, 
-       verbose=True,
-       calibration = tools_path / 'sss_cal.dat',
-       cross_talk = tools_path  / 'ct_sparse.fif'
-       )
-    
-    raw_data_sss.resample(500)    # resample data to make the data more manageable             
-    raw_data_sss.filter(1, 100)  # filter the data to remove drifts and other possible artefacts. No high-pass filter this this might affect detection of muscle and eye artefacts
-    raw_data.notch_filter(np.arange(50, 251, 50))
-    
-    raw_data_sss.save(out_file)
+        raw_data.info['bads'] = []
+        
+        # Import csv with generally known bad channels
+        bads_path = base_path / 'Data' / 'Bad_Channels.csv'  # Replace with your actual file path
+        df = pd.read_csv(bads_path)
+        channel_names = df['Bad_Channels'].tolist()
+        
+        raw_data.info['bads'] = channel_names
+        
+        raw_data_check = raw_data.copy()
+        auto_noisy_chs, auto_flat_chs, auto_scores = find_bad_channels_maxwell(raw_data_check, return_scores=True, verbose = True,coord_frame='meg') 
+        
+        bads = list(set(raw_data.info['bads'] + auto_noisy_chs + auto_flat_chs))
+        raw_data.info['bads'] = bads
+        
+        raw_data_sss = mne.preprocessing.maxwell_filter(
+        raw_data, 
+        st_duration=50, 
+        st_correlation=.9, 
+        coord_frame='meg', 
+        destination= None, 
+        verbose=True,
+        calibration = tools_path / 'sss_cal.dat',
+        cross_talk = tools_path  / 'ct_sparse.fif'
+        )
+        
+        raw_data_sss.resample(500)    # resample data to make the data more manageable             
+        raw_data_sss.filter(1, 100)  # filter the data to remove drifts and other possible artefacts. No high-pass filter this this might affect detection of muscle and eye artefacts
+        raw_data.notch_filter(np.arange(50, 251, 50))
+        
+        raw_data_sss.save(out_file, overwrite=True)
     
 def coreg_subs(subs):
     script_dir  = Path(__file__).resolve() # Location of current scripts
