@@ -13,20 +13,17 @@ from meg_analysis.Scripts.Preprocessing.RedoEvents import Events_Fix
 from meg_analysis.Scripts.Preprocessing.Preproc_Rest import  Crop_Rest_Events, Epoch_Rest
 from meg_analysis.Scripts.Preprocessing.Preproc_Functions import read_events
 
-from meg_analysis.Scripts.Behavior.WL_implicitSEplot_Extend import process_WL_data
-
 from meg_analysis.Tools.Audio_Read import export_meg_audio
 
-#%% 
+#%% Preprocessing --------------------------------------------------------------------
 # Import the Raw MEG data and MRI's and perform Tsss and other first run preprocessing 
-
 # MAKE SURE TO RUN AS ADMINISTRATOR!
 # give number as string 
-sub_codes = ['56'] # 61  still need 1 and 9, 9 has a naming problem
+sub_codes = ['XX'] # 61  still need 1 and 9, 9 has a naming problem
 Import_Data(sub_codes)
 
 #%%
-subs = ['sub-56'] # 'sub-XX'
+subs = ['sub-28'] # 'sub-XX'
 coreg_subs(subs)
 
 # %% 
@@ -56,21 +53,38 @@ apply_ICA(rstate)
 
 Artifacts_Manual(redo_flag=1, rstate=100, start_sub="63", single_sub=True)
 
-# %% 
+# %% --------------------------------------------------------------------
 # Rest analyses:
-Crop_Rest_Events(['sub-25','sub-29','sub-30','sub-31','sub-32','sub-33','sub-35','sub-36'])
-
+script_path = Path('Z:\meg_analysis\Scripts\Preprocessing') # giving the path to the script manually, because the other way keeps defaulting to \\analyse7 instead of Z:
+Crop_Rest_Events(script_path,['sub-57','sub-58','sub-59','sub-60','sub-61','sub-62','sub-63'],True)
+#%% 
 # Make the Epochs
-manual_rej = 1 # 0 = take previous artefacts; 1 = do artf rejection manually
 epoch_dur = 4 # epoch window size in seconds
-sessions = ['ses-1'] # give options for two sessions
-Epoch_Rest(manual_rej,epoch_dur, sessions)
+sessions = ['ses-1'] # give options for two sessions; session 2 not impmlemented yet though
+Epoch_Rest(script_path, epoch_dur, sessions, True)
 
-# %% Behavior
-fig_imp, fig_exp = process_WL_data(m=0, min_seq_length=2)
+# %% Behavioral Analysis -----------------------------------------------
+# WL Behavior -------------------------------------------------------
+from meg_analysis.Scripts.Behavior.WL_implicitSEplot_Extend import process_WL_data
 
-# %% Other
-import_ER() # import and process the empty room data to allow for NCM for source localisation, input is the data 'YYMMDD'
+wl = {}
+wl['data'] = []
+wl['names'] = []
+wl['data'], wl['names'] = process_WL_data(m=0, min_seq_length=2, plot_flag=1)
+
+# %% SRT Behavior 
+from meg_analysis.Scripts.Behavior.SRT_Performance import srt_import_fit
+
+base_path =  Path('Z:/')
+fit_limit = [0.24, 0.14]  # Example filter limits for [random, sequence]
+sl_window = 50  # Window size for skill learning calculation
+srt_data = srt_import_fit(base_path, fit_limit, sl_window, method='loess', poly_degree=1)
+print("Analysis complete!")
+# %% Other --------------------------------------------------------------
+# Import empty room data for NCM
+script_path = Path('Z:\meg_analysis\Scripts\Preprocessing') # giving the path to the script manually, because the other way keeps defaulting to \\analyse7 instead of Z:
+import_ER(script_path, date = None) # import and process the empty room data to allow for NCM for source localisation, input is the data 'YYMMDD'
+#%% 
 # Events_Fix Careful, running this will rerun all the event files and overwrite the existing ones
 #%% Export audio of a specific subject and block to relisten in case of doubts 
 meg_file = '//raw/Project0407/eir06/250303/MEG_2058_WL2.fif'
@@ -79,4 +93,5 @@ export_meg_audio(meg_file, wav_file)
 
 # %% Change watershed algorithm parameters to fix intersections 
 
-re_run_BEM('sub-56', pre_flood = 10, scale_factor = 0)
+re_run_BEM('sub-57', pre_flood = 10, scale_factor = 0)
+# %%
