@@ -119,7 +119,7 @@ def calculate_exp_score(segments):
     return np.log2(sum(segment_scores))
 
 # %%
-def process_WL_data(m = 0, min_seq_length=2):
+def process_WL_data(m = 0, min_seq_length=2, plot_flag=0):
     '''
     Calculate average subject wordlist performance for implicit and explicit subjects separately
     
@@ -137,6 +137,7 @@ def process_WL_data(m = 0, min_seq_length=2):
     rel_info = pd.DataFrame({
         'sub': sub_info['sub'],
         'ID': sub_info['ID'],
+        'Exclusion': sub_info['Excluded'],
         'Explicitness': sub_info['Explicitness'],
         'Order': sub_info['ID'] // 1000,  # Extract the order; 1 = Exp first, 2 = Cont first
         'SubID': sub_info['ID'] % 1000    # Extract the corresponding subject IDs
@@ -182,17 +183,29 @@ def process_WL_data(m = 0, min_seq_length=2):
             else:
                 print(f'No file for subject {sub_number} - Session {ses_number}.')
 
-    #%% Separate Data by explicitness and condition
-
+    #%% Separate Data by explicitness, exclusion, and condition
     sr_con          = []
     sr_incon        = []
     sr_con_exp      = []
     sr_incon_exp    = []
+    
+    # Create lists to track subject names for each condition
+    sub_con         = []
+    sub_incon       = []
+    sub_con_exp     = []
+    sub_incon_exp   = []
+    
     sr = {}
     exp_trck = {}
     for i, sub in enumerate(data): # go through processed subjects
+        if sub[0] is None:
+            continue
+                
         exp_idx = rel_info.SubID == sub_nums[i]
         exp_trck[i] = rel_info['Explicitness'][exp_idx] 
+        
+        if rel_info['Exclusion'][exp_idx].iloc[0] == 1:  # Fixed missing colon and added .iloc[0]
+            continue # skip excluded subjects
         
         sr[i] = []    
         for t in range(10): # go through iterations           
@@ -204,28 +217,50 @@ def process_WL_data(m = 0, min_seq_length=2):
             exp_score = calculate_exp_score(segments)
             sr[i].append(exp_score)
 
+        # Determine condition and add data and subject name to appropriate lists
         if (sub_conds[i] == 1) & (exp_trck[i].iloc[0] == 0):
             sr_con.append(sr[i])
+            sub_con.append(sub_names[i])  
         elif (sub_conds[i] == 2) & (exp_trck[i].iloc[0] == 0):
             sr_incon.append(sr[i])
+            sub_incon.append(sub_names[i])  
         elif (sub_conds[i] == 1) & (exp_trck[i].iloc[0] == 1):
             sr_con_exp.append(sr[i])
+            sub_con_exp.append(sub_names[i])  
         elif (sub_conds[i] == 2) & (exp_trck[i].iloc[0] == 1):
             sr_incon_exp.append(sr[i])
-    # %% Plot 1 
-
-    fig_imp, axs_imp = plot_WL_data(sr_con,sr_incon,m)
-
-    # %% Plot 2
-    fig_exp, axs_exp = plot_WL_data(sr_con_exp,sr_incon_exp,m)
- 
-    #%% Format title and layout   
-    fig_imp.suptitle('Serial Recall Learning Curves - Implicit', y=0.98, fontsize=10, fontweight='bold')
-    fig_exp.suptitle('Serial Recall Learning Curves - Explicit', y=0.98, fontsize=10, fontweight='bold')
+            sub_incon_exp.append(sub_names[i])  
     
-    fig_imp.tight_layout()
-    fig_exp.tight_layout()
+    # %% 
+    if plot_flag == 1:
+        # Plot 1 
+        fig_imp, axs_imp = plot_WL_data(sr_con, sr_incon, m)
+
+        # Plot 2
+        fig_exp, axs_exp = plot_WL_data(sr_con_exp, sr_incon_exp, m)
     
-    plt.show()
-    # sr_con, sr_incon, sr_con_exp, sr_incon_exp
-    return fig_imp, fig_exp
+        #%% Format title and layout   
+        fig_imp.suptitle('Serial Recall Learning Curves - Implicit', y=0.98, fontsize=10, fontweight='bold')
+        fig_exp.suptitle('Serial Recall Learning Curves - Explicit', y=0.98, fontsize=10, fontweight='bold')
+        
+        fig_imp.tight_layout()
+        fig_exp.tight_layout()
+        
+        plt.show()
+    
+    # Create dictionaries to return data and subject names by condition
+    wl_data = {
+        'con_imp': sr_con, 
+        'incon_imp': sr_incon, 
+        'con_exp': sr_con_exp, 
+        'incon_exp': sr_incon_exp
+    }
+    
+    sub_names = {
+        'con_imp': sub_con, 
+        'incon_imp': sub_incon, 
+        'con_exp': sub_con_exp, 
+        'incon_exp': sub_incon_exp
+    }
+    
+    return wl_data, sub_names  # Return both data and subject names

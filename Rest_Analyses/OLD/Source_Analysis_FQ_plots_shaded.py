@@ -1,3 +1,4 @@
+#%% 
 import h5py
 import math
 import numpy as np
@@ -8,10 +9,10 @@ from fooof.bands import Bands
 from fooof.analysis import get_band_peak_fg
 from typing import List, Dict, Tuple
 
-from meg_analysis.Scripts.Behavior.WL_Analysis import wl_performance
+from meg_analysis.Scripts.Behavior.WL_implicitSEplot_Extend import process_WL_data
 
 from pathlib import Path
-
+#%% 
 def load_processed_data(file_path):
     """Load processed FFT data from HDF5 file."""
     data = {}
@@ -469,7 +470,7 @@ LR  = ['left']
 Condition = ['Congruent', 'Incongruent']
 base_path   = Path('//analyse7/Project0407/')
 fig_path    = base_path / '/Data/Rest/Figs/Sub_Spectra/' 
-WL_data, WL_subs = wl_performance(Path(base_path))
+wl_data = process_WL_data(m=0, min_seq_length=2, plot_flag=0)
 
 #%%
 for c,ConIn in enumerate(Condition):
@@ -485,16 +486,16 @@ for c,ConIn in enumerate(Condition):
         else:
             print(f'file {file_path.name} not found! Skipping...')
             continue
-        # for sub in data.keys():
-        #     fig1,components = plot_spectral_components(data[sub]['freqs'], data[sub]['spectra'], data[sub]['blocks'])
-        #    # fig1.savefig(fig_path / f'{sub}_{ConIn}_{side}_Motor_spectral_components.png', dpi=300, bbox_inches='tight')
+        for sub in data.keys():
+            fig1,components = plot_spectral_components(data[sub]['freqs'], data[sub]['spectra'], data[sub]['blocks'])
+            # fig1.savefig(fig_path / f'{sub}_{ConIn}_{side}_Motor_spectral_components.png', dpi=300, bbox_inches='tight')
            #plt.close(fig1)
-            
+#%%
         # fig2 = plot_multi_subject_components_unlocked(
         #     data, WL_data, WL_subs, 'periodic', col)
-        fig2 = plot_multi_subject_components(
-            data, window_size, WL_data, WL_subs, 'periodic', col)
-        fig2.suptitle(f'{ConIn} {side} Motor Oscillatory activity')
+        #fig2 = plot_multi_subject_components(
+        #    data, window_size, WL_data, WL_subs, 'periodic', col)
+        #fig2.suptitle(f'{ConIn} {side} Motor Oscillatory activity')
         
         #fig3 = plot_multi_subject_components_unlocked(
         #    data, WL_data, WL_subs, 'aperiodic', col)

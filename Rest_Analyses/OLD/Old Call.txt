@@ -1,0 +1,8 @@
+# Rest analyses:
+Crop_Rest_Events(['sub-25','sub-29','sub-30','sub-31','sub-32','sub-33','sub-35','sub-36'])
+
+# Make the Epochs
+manual_rej = 1 # 0 = take previous artefacts; 1 = do artf rejection manually
+epoch_dur = 4 # epoch window size in seconds
+sessions = ['ses-1'] # give options for two sessions
+Epoch_Rest(manual_rej,epoch_dur, sessions)
