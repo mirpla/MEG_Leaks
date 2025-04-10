@@ -63,6 +63,9 @@ epoch_dur = 4 # epoch window size in seconds
 sessions = ['ses-1'] # give options for two sessions; session 2 not impmlemented yet though
 Epoch_Rest(script_path, epoch_dur, sessions, True)
 
+#%% Contains Python pipeline analyses for resting state data source reconstruction, analysis and plotting
+Rest_Analysis
+
 # %% Behavioral Analysis -----------------------------------------------
 # WL Behavior -------------------------------------------------------
 from meg_analysis.Scripts.Behavior.WL_implicitSEplot_Extend import process_WL_data
