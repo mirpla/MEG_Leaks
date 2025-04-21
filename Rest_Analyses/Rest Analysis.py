@@ -10,15 +10,16 @@ from meg_analysis.Scripts.Rest_Analyses.Source_Analysis_MC_Spectra import plot_s
 data = pd.read_csv('Z:/Data/Subject_Information.csv',encoding='latin1') 
 Included = ~data['Excluded'].astype(bool)
 subs = data['sub'][Included]
-for sub  in subs:
-    ses     = 'ses-1'  
-    # source loc parameters
-    src_d   = 0.8 # depth
-    src_l   = 0.2 # loose
-    src_f   = False # Fixed? (True/False)
+#for sub  in subs:
+sub = 'sub-37' # select the subject folder to look at
+ses     = 'ses-1'  
+# source loc parameters
+src_d   = 0.8 # depth
+src_l   = 0.2 # loose
+src_f   = False # Fixed? (True/False)
 
-    # Example usage
-    make_source_rest(sub, ses, src_d, src_l, src_f)
+# Example usage
+make_source_rest(sub, ses, src_d, src_l, src_f)
 # %% 
 #Create the Motor Cortex data for each block
 motor_FFT_analysis(Condition = ['Congruent', 'Incongruent'], LR = ['left','right'])

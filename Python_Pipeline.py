@@ -19,11 +19,11 @@ from meg_analysis.Tools.Audio_Read import export_meg_audio
 # Import the Raw MEG data and MRI's and perform Tsss and other first run preprocessing 
 # MAKE SURE TO RUN AS ADMINISTRATOR!
 # give number as string 
-sub_codes = ['XX'] # 61  still need 1 and 9, 9 has a naming problem
+sub_codes = ['37','64'] # 61  still need 1 and 9, 9 has a naming problem
 Import_Data(sub_codes)
 
 #%%
-subs = ['sub-28'] # 'sub-XX'
+subs = ['sub-64'] # 'sub-XX'
 coreg_subs(subs)
 
 # %% 
@@ -35,7 +35,7 @@ Preprocess_Data()
 # %% 
 # Look at ICA components and write down which ones to exclude in a separate .csv (Data\ICA_Components.csv)
 ses = 0 # select session for checking ICA (ses 1 == 0; ses 2 == 1)
-sub = Path('//analyse7/project0407/Data/sub-63') # select the subject folder to look at
+sub = Path('//analyse7/project0407/Data/sub-37') # select the subject folder to look at
 rstate = 100 # select the seed 100 is notchfiltered 97 was not 
 check_ICA_comp(sub, ses, rstate)
 
@@ -51,17 +51,17 @@ apply_ICA(rstate)
 #    start_sub: optional parameter to specify starting subject (format: "XX" where XX is the subject number, e.g., "05")
 #    single_sub: if True, only process the specified start_sub. If False, continue processing subsequent subjects (default: False)
 
-Artifacts_Manual(redo_flag=1, rstate=100, start_sub="63", single_sub=True)
+Artifacts_Manual(redo_flag=1, rstate=100, start_sub="64", single_sub=True)
 
 # %% --------------------------------------------------------------------
 # Rest analyses:
 script_path = Path('Z:\meg_analysis\Scripts\Preprocessing') # giving the path to the script manually, because the other way keeps defaulting to \\analyse7 instead of Z:
-Crop_Rest_Events(script_path,['sub-57','sub-58','sub-59','sub-60','sub-61','sub-62','sub-63'],True)
+Crop_Rest_Events(script_path,['sub-37'],False)
 #%% 
 # Make the Epochs
 epoch_dur = 4 # epoch window size in seconds
 sessions = ['ses-1'] # give options for two sessions; session 2 not impmlemented yet though
-Epoch_Rest(script_path, epoch_dur, sessions, True)
+Epoch_Rest(script_path, epoch_dur,['sub-64'], sessions, False)
 
 # %% Behavioral Analysis -----------------------------------------------
 # WL Behavior -------------------------------------------------------
