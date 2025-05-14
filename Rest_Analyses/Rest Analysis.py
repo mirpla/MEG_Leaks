@@ -25,11 +25,11 @@ make_source_rest(sub, ses, src_d, src_l, src_f)
 motor_FFT_analysis(Condition = ['Congruent', 'Incongruent'], LR = ['left','right'])
 
 #%% Plot the Source Frequency Analysis
-ss_flag = 0 # 1 = create and save individual subject spectra
-ms_flag = 1 # 1 = create and save group spectra locked to behavior
-msul_flag = 1 # 1 = create and save group behaviorally unlocked spectra
-
-plot_source_spectra(ss_flag, ms_flag, msul_flag, 
+ss_flag = 0     # 1 = create and save individual subject spectra
+ms_flag = 0     # 1 = create and save group spectra locked to behavior
+msul_flag = 0   # 1 = create and save group behaviorally unlocked spectra
+a_flag = 1      # 1 = create and save group spectra locked to behavior (unlocked)
+plot_source_spectra(ss_flag, ms_flag, msul_flag, a_flag,
                         window_size = 3, 
                         Condition = ['Congruent','Incongruent'], 
                         LR  = ['left','right'],   

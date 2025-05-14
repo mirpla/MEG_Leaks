@@ -243,6 +243,7 @@ def srt_import_fit(base_path, fit_limit, sl_window,method='loess',poly_degree=2)
     seq_ori = {}
     seq_ori[1] = pd.read_csv(seq_path / 'seq-1.txt', sep='\t', names=['block', 'target', 'ID'])
     seq_ori[2] = pd.read_csv(seq_path / 'seq-2.txt', sep='\t', names=['block', 'target', 'ID'])
+    seq_ori[3] = pd.read_csv(seq_path / 'seq-3.txt', sep='\t', names=['block', 'target', 'ID']) # incongruent 64 <=
     
     # Load subject information
     sub_info = pd.read_csv(base_path / 'Data' / 'Subject_Information.csv', encoding='latin1')

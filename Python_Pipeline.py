@@ -19,11 +19,11 @@ from meg_analysis.Tools.Audio_Read import export_meg_audio
 # Import the Raw MEG data and MRI's and perform Tsss and other first run preprocessing 
 # MAKE SURE TO RUN AS ADMINISTRATOR!
 # give number as string 
-sub_codes = ['37','64'] # 61  still need 1 and 9, 9 has a naming problem
+sub_codes = ['66'] # 61  still need 1 and 9, 9 has a naming problem
 Import_Data(sub_codes)
 
 #%%
-subs = ['sub-64'] # 'sub-XX'
+subs = ['sub-66'] # 'sub-XX'
 coreg_subs(subs)
 
 # %% 
@@ -35,7 +35,7 @@ Preprocess_Data()
 # %% 
 # Look at ICA components and write down which ones to exclude in a separate .csv (Data\ICA_Components.csv)
 ses = 0 # select session for checking ICA (ses 1 == 0; ses 2 == 1)
-sub = Path('//analyse7/project0407/Data/sub-37') # select the subject folder to look at
+sub = Path('//analyse7/project0407/Data/sub-66') # select the subject folder to look at
 rstate = 100 # select the seed 100 is notchfiltered 97 was not 
 check_ICA_comp(sub, ses, rstate)
 
@@ -51,12 +51,12 @@ apply_ICA(rstate)
 #    start_sub: optional parameter to specify starting subject (format: "XX" where XX is the subject number, e.g., "05")
 #    single_sub: if True, only process the specified start_sub. If False, continue processing subsequent subjects (default: False)
 
-Artifacts_Manual(redo_flag=1, rstate=100, start_sub="64", single_sub=True)
+Artifacts_Manual(redo_flag=1, rstate=100, start_sub="66", single_sub=True)
 
 # %% --------------------------------------------------------------------
 # Rest analyses:
 script_path = Path('Z:\meg_analysis\Scripts\Preprocessing') # giving the path to the script manually, because the other way keeps defaulting to \\analyse7 instead of Z:
-Crop_Rest_Events(script_path,['sub-37'],False)
+Crop_Rest_Events(script_path,['sub-65','sub-66','sub-67'],False)
 #%% 
 # Make the Epochs
 epoch_dur = 4 # epoch window size in seconds
@@ -80,6 +80,8 @@ fit_limit = [0.24, 0.14]  # Example filter limits for [random, sequence]
 sl_window = 50  # Window size for skill learning calculation
 srt_data = srt_import_fit(base_path, fit_limit, sl_window, method='loess', poly_degree=1)
 print("Analysis complete!")
+
+# for full SRT analysis see SRT_Analysis.py
 # %% Other --------------------------------------------------------------
 # Import empty room data for NCM
 script_path = Path('Z:\meg_analysis\Scripts\Preprocessing') # giving the path to the script manually, because the other way keeps defaulting to \\analyse7 instead of Z:
@@ -87,7 +89,7 @@ import_ER(script_path, date = None) # import and process the empty room data to 
 #%% 
 # Events_Fix Careful, running this will rerun all the event files and overwrite the existing ones
 #%% Export audio of a specific subject and block to relisten in case of doubts 
-meg_file = '//raw/Project0407/eir06/250303/MEG_2058_WL2.fif'
+meg_file = '//raw/Project0407/len25/250502/MEG_1067_WL1.fif'
 wav_file = 'C:/Users/mirceav/Desktop/audio.wav'
 export_meg_audio(meg_file, wav_file)
 

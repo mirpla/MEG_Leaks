@@ -21,13 +21,13 @@ figs = srt_plot_sl( srt_data, base_path, norm, save_path, separate_conditions)
 
 # %% Plot individual SRT performances
 save = True
-sub = [42] # list of subjects to plot (for example [2,4]) (can be None)
+sub = [67] # list of subjects to plot (for example [2,4]) (can be None)
 y_lim = [0, 1] # y-axis limits
 plot_trial_performance(srt_data, base_path, y_lim, sub, save) 
 
 # %% Plot individual buttons 
 # plot individual buttons presses for sequence and random trials. If no Path is given plots are output immediately.
-sub = [42] # list of subjects to plot (for example [2,4]). If None processes all subjects
+sub = [67] # list of subjects to plot (for example [2,4]). If None processes all subjects
 use_median  = True # using median or mean  
 plot_buttons(srt_data, base_path, sub, use_median)
 
