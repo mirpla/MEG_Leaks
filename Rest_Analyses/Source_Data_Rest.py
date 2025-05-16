@@ -8,7 +8,7 @@ import numpy as np
 import time
 
 # Enable GPU acceleration for MNE
-os.environ['MNE_USE_CUDA'] = 'true'
+os.environ['MNE_USE_CUDA'] = 'false'
 
 from meg_analysis.Scripts.Rest_Analyses.Source_Class import RestSourceData
 
@@ -43,7 +43,6 @@ def make_source_rest(sub, ses, src_d, src_l, src_f, inv_method = 'dSPM', n_jobs=
     inv_lambda  = 1.0 / snr ** 2 # Regularization parameter
     
     # general paths
-    fs_path         = Path('C:/fs_data/')
     script_dir      = Path(__file__).resolve() # Location of current scripts
     base_path       = script_dir.parent.parent.parent.parent # Root folder
     data_path       = base_path / 'Data' 
@@ -60,10 +59,9 @@ def make_source_rest(sub, ses, src_d, src_l, src_f, inv_method = 'dSPM', n_jobs=
     # specific mri paths
     src_path        = data_path / f'{sub}' / 'anat' / 'bem' / f'{sub}-src.fif'
     bem_path        = data_path / f'{sub}' / 'anat' / 'bem' / f'{sub}_bem.h5'
-    epoch_path      = data_path / f'{sub}' / f'{ses}' / 'meg' / 'rest'
-    
-    trans_path      = fs_path   / f'{sub}' / 'bem'  / f'{sub}-{ses}-trans.fif'  
+    trans_path      = data_path / f'{sub}' / 'anat' / 'bem' / f'{sub}-{ses}-trans.fif'  
    
+    epoch_path      = data_path / f'{sub}' / f'{ses}' / 'meg' / 'rest'
     
     # set up output paths
     out_path = data_path / f'{sub}' / f'{ses}' / 'meg' / 'rest' / 'source' 
