@@ -11,7 +11,8 @@ sub_path = project_root / 'Data' / 'Subject_Information.csv'
 # set up participant info
 data = pd.read_csv(project_root / 'Data' / 'Subject_Information.csv', encoding='latin1') 
 Included = ~data['Excluded'].astype(bool)
-subs = data['sub'][Included].tolist()
+#subs = data['sub'][Included].tolist()
+subs = ['sub-65','sub-68'] # 'sub-XX'
 ses = 'ses-1'  
 print(subs)
 

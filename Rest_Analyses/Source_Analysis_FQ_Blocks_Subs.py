@@ -107,7 +107,7 @@ def save_subject(out_file, sub, subject_data):
        sub_group.attrs['central_block'] = subject_data['central_block']
        
 #%% Start Script
-def motor_FFT_analysis(Condition = ['Congruent', 'Incongruent'], LR = ['left','right'] , ses = 'ses-1'):
+def motor_FFT_analysis(source_param, Condition = ['Congruent', 'Incongruent'], LR = ['left','right'] , ses = 'ses-1'):
     '''
     This script processes the source data of the motor cortex for each subject and condition.
     It calculates the FFT for each block and saves the data in a hdf5 file.
@@ -129,7 +129,12 @@ def motor_FFT_analysis(Condition = ['Congruent', 'Incongruent'], LR = ['left','r
     # subject selection
     sub_lst     = {} # store subject labels for each condition
     sub_data    = {} # store data for each condition
-         
+
+    method = source_param['method']
+    d      = source_param['depth']
+    l      = source_param['loose']
+    snr    = source_param['snr']
+
     # prepare variables/paths and set parameters
     subject_data = {}
     for c,ConIn in enumerate(Condition):
@@ -146,7 +151,7 @@ def motor_FFT_analysis(Condition = ['Congruent', 'Incongruent'], LR = ['left','r
             
             # general paths
             base_path   = Path('//analyse7/Project0407/')
-            out_file    = base_path / 'Data' / 'Rest' / f'{ConIn}_{side}_Motor.h5'
+            out_file    = base_path / 'Data' / 'Rest' / f'{ConIn}_{side}_{method}_Motor.h5'
             # Frequency Range
             fmin = 1
             fmax = 50
@@ -156,8 +161,22 @@ def motor_FFT_analysis(Condition = ['Congruent', 'Incongruent'], LR = ['left','r
                 subjects_data = {}  
                 # subject specific paths
                 source_path = base_path / f'/Data/{sub}/{ses}/meg/rest/source/'
-                h5_file     = source_path / f'{sub}_{ses}_src_rest-all_dSPM-d8-l2-snr3.h5'
+
+                h5_file     = source_path / f'{sub}_{ses}_src_rest-all_{method}-d{d}-l{l}-snr{snr}.h5'
                 labels_dir  = Path('C:/fs_data') / sub / 'label'
+                
+                # skip subjects that have already been processed
+                mode = 'a' if out_file.exists() else 'w'
+
+                with h5py.File(out_file, mode) as f:
+                    # Add file attributes if creating new file
+                    if mode == 'w':
+                        f.attrs['description'] = 'Processed MEG FFT data for specific ROI'
+                    
+                    # Check if subject already exists
+                    if sub in f:
+                        print(f"Skipping {sub} - already exists in file")
+                        continue
                 
                 frequencies, block_spectra, blocks = process_single_subject(
                     sub, ses, side, labels_dir, h5_file, fmin, fmax)

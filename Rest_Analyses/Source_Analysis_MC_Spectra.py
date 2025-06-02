@@ -650,7 +650,8 @@ def plot_source_spectra(ss_flag, ms_flag, msul_flag, a_flag=0,
                         window_size = 3, 
                         Condition = ['Congruent','Incongruent'], 
                         LR  = ['left','right'],   
-                        comp_t = ['periodic','aperiodic']):
+                        comp_t = ['periodic','aperiodic'],
+                        method = 'dSPM'):
     '''
     Plot the source spectra for the motor cortex data.
     Parameters:
@@ -680,7 +681,7 @@ def plot_source_spectra(ss_flag, ms_flag, msul_flag, a_flag=0,
             else: 
                 raise Exception(f'Condition {ConIn} not found; Condition has to be either ''Congruent'' or ''Incongruent''')  
                             
-            file_path   = base_path / f'/Data/Rest/{ConIn}_{side}_Motor.h5'
+            file_path   = base_path / f'/Data/Rest/{ConIn}_{side}_{method}_Motor.h5'
             if file_path.exists():
                 data = load_processed_data(file_path)
             else:
