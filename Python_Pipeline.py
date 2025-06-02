@@ -19,7 +19,7 @@ from meg_analysis.Tools.Audio_Read import export_meg_audio
 # Import the Raw MEG data and MRI's and perform Tsss and other first run preprocessing 
 # MAKE SURE TO RUN AS ADMINISTRATOR!
 # give number as string 
-sub_codes = ['68'] # 61  still need 1 and 9, 9 has a naming problem
+sub_codes = ['69'] # 61  still need 1 and 9, 9 has a naming problem
 Import_Data(sub_codes)
 
 #%%
@@ -51,20 +51,34 @@ apply_ICA(rstate)
 #    start_sub: optional parameter to specify starting subject (format: "XX" where XX is the subject number, e.g., "05")
 #    single_sub: if True, only process the specified start_sub. If False, continue processing subsequent subjects (default: False)
 
-Artifacts_Manual(redo_flag=1, rstate=100, start_sub="68", single_sub=True)
+Artifacts_Manual(redo_flag=1, rstate=100, start_sub="66", single_sub=True)
 
 # %% --------------------------------------------------------------------
 # Rest analyses:
 script_path = Path('Z:\meg_analysis\Scripts\Preprocessing') # giving the path to the script manually, because the other way keeps defaulting to \\analyse7 instead of Z:
-Crop_Rest_Events(script_path,['sub-65','sub-66','sub-67'],False)
+Crop_Rest_Events(script_path,['sub-66','sub-67','sub-68'],False)
 #%% 
 # Make the Epochs
 epoch_dur = 4 # epoch window size in seconds
 sessions = ['ses-1'] # give options for two sessions; session 2 not impmlemented yet though
-Epoch_Rest(script_path, epoch_dur,['sub-64'], sessions, False)
+Epoch_Rest(script_path, epoch_dur,['sub-65','sub-66','sub-67','sub-68'], sessions, False)
 
 #%% Contains Python pipeline analyses for resting state data source reconstruction, analysis and plotting
-Rest_Analysis
+# meg_analysis.Scripts.Rest_Analyses.Rest_Analysis --- Rest_Analysis
+
+# %% --------------------------------------------------------------------
+# SRT analyses:
+script_path = Path('Z:\meg_analysis\Scripts\Preprocessing') # giving the path to the script manually, because the other way keeps defaulting to \\analyse7 instead of Z:
+lock = 'resp' # stimulus locked or response locked processing 'stim' or 'resp'
+if lock == 'stim':
+    pre  = 0.4
+    post = 1
+elif lock == 'resp': 
+    pre = 0.8   # pre-stimulus time in seconds    
+    post = 0.6  # post-stimulus time in seconds
+
+sessions = ['ses-1'] # give options for two sessions; session 2 not impmlemented yet though
+Epoch_SRT(script_path, pre, post, lock, sessions, False, subs = None)
 
 # %% Behavioral Analysis -----------------------------------------------
 # WL Behavior -------------------------------------------------------
@@ -76,15 +90,8 @@ wl['names'] = []
 wl['data'], wl['names'] = process_WL_data(m=0, min_seq_length=2, plot_flag=1)
 
 # %% SRT Behavior 
-from meg_analysis.Scripts.Behavior.SRT_Performance import srt_import_fit
+# for full SRT analysis see: meg_analysis.Scripts.Behavior.SRT_Analysis 
 
-base_path =  Path('Z:/')
-fit_limit = [0.24, 0.14]  # Example filter limits for [random, sequence]
-sl_window = 50  # Window size for skill learning calculation
-srt_data = srt_import_fit(base_path, fit_limit, sl_window, method='loess', poly_degree=1)
-print("Analysis complete!")
-
-# for full SRT analysis see SRT_Analysis.py
 # %% Other --------------------------------------------------------------
 # Import empty room data for NCM
 script_path = Path('Z:\meg_analysis\Scripts\Preprocessing') # giving the path to the script manually, because the other way keeps defaulting to \\analyse7 instead of Z:
@@ -92,7 +99,7 @@ import_ER(script_path, date = None) # import and process the empty room data to 
 #%% 
 # Events_Fix Careful, running this will rerun all the event files and overwrite the existing ones
 #%% Export audio of a specific subject and block to relisten in case of doubts 
-meg_file = '//raw/Project0407/len25/250502/MEG_1067_WL1.fif'
+meg_file = '//raw/Project0407/nfa05/250527/MEG_2069_WL5.fif'
 wav_file = 'C:/Users/mirceav/Desktop/audio.wav'
 export_meg_audio(meg_file, wav_file)
 

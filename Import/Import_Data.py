@@ -17,7 +17,7 @@ def Import_Data(sub_codes):
     script_dir = Path(__file__).resolve() # Location of current scripts
     base_path  = script_dir.parent.parent.parent.parent # Basepath that is convenient to move from throughout the tree
     
-    raw_path  = Path(r'\\raw\Project0407')  # Adjust this path as necessary
+    raw_path  = Path(r'//raw/Project0407')  # Adjust this path as necessary
     anat_path = base_path / 'Anats' 
     
     sub_key  = pd.read_csv(base_path / 'Data/Subject_Keys.csv', dtype={0: str, 1: str, 2: str, 3: float, 4: str})
