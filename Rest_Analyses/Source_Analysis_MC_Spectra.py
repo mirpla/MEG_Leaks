@@ -466,12 +466,11 @@ def plot_multi_subject_components(subjects_data: Dict, window_size: int,
         ax.legend()
     
     return fig
-
 def plot_multi_subject_components_unlocked(subjects_data: Dict,
                                 WL_data: Dict, WL_idx: Dict, component_type: str, fill_color = 'k') -> plt.Figure:
     """Plot periodic or aperiodic components with confidence intervals/standard deviation."""
     mean_width = 3
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 12), height_ratios=[1, 1, 1], constrained_layout=True)
+    fig, (ax1, ax3) = plt.subplots(2, 1, figsize=(12, 12), height_ratios=[1, 1], constrained_layout=True)
 
     plt.rcParams['font.family'] = 'Calibri'
 
@@ -480,7 +479,7 @@ def plot_multi_subject_components_unlocked(subjects_data: Dict,
     fill_alpha = 0.2
     
     all_components = {
-        'alpha': [], 'beta': [], 
+        'mu': [], 
         'offset': [], 'slope': [],
         'behavioral': []
     }
@@ -501,73 +500,80 @@ def plot_multi_subject_components_unlocked(subjects_data: Dict,
         
         
         # Extract values
-        alpha_values = [comp['alpha'] for comp in components]
-        beta_values = [comp['beta'] for comp in components]
+        mu_values = [comp['mu'] for comp in components]
         offset_values = [comp['aperiodic_offset'] for comp in components]
         slope_values = [comp['aperiodic_slope'] for comp in components]
         
       
-        # Get behavioral data
+        # Get behavioral data - pad to match 12 blocks
         behav = [np.nan, np.nan] + WL_data[WL_idx.index(sub)]
         
         # Normalize values
-        alpha_values = normalize_measures_bl(alpha_values)
-        beta_values = normalize_measures_bl(beta_values)
+        test_measure = np.array(mu_values, dtype=float)
+        if test_measure[0] == 0:
+            continue
+        mu_values = normalize_measures_bl(mu_values)
         slope_values = normalize_measures_bl(slope_values)
         offset_values = normalize_measures_bl(offset_values)
         
-        if np.any(np.isinf(alpha_values)):
+        if np.any(np.isinf(mu_values)):
             continue
         
-        all_components['alpha'].append(alpha_values)
-        all_components['beta'].append(beta_values)
+        all_components['mu'].append(mu_values)
         all_components['offset'].append(offset_values)
         all_components['slope'].append(slope_values)
         all_components['behavioral'].append(behav)
     
     # Calculate statistics and plot
-    x = np.arange(0, len(behav))
+    # Use 12 blocks for x-axis to match the mu rhythm data
+    n_blocks = 12
+    x = np.arange(0, n_blocks)
+    
+    # Individual subject line properties
+    individual_alpha = 0.3
+    individual_linewidth = 1
+    
     for comp_name in all_components.keys():
         comp_array = np.array(all_components[comp_name])
         mean_comp = np.nanmean(comp_array, axis=0)
-        std_comp = np.nanstd(comp_array, axis=0)
         
-        # Calculate 95% confidence interval
-        n_subjects = np.sum(~np.isnan(comp_array), axis=0)
-        sem_comp = std_comp / np.sqrt(n_subjects)
-        ci_95 = 1.96 * sem_comp
+        # First plot individual subjects as background lines
+        for i, subject_data in enumerate(comp_array):
+            if component_type == 'periodic':
+                if comp_name == 'mu':
+                    ax1.plot(x, subject_data, color=fill_color, alpha=individual_alpha, 
+                            linewidth=individual_linewidth)
+                elif comp_name == 'behavioral':
+                    ax3.plot(x, subject_data, color=fill_color, alpha=individual_alpha, 
+                            linewidth=individual_linewidth)
+            else:
+                if comp_name == 'offset':
+                    ax1.plot(x, subject_data, color=fill_color, alpha=individual_alpha, 
+                            linewidth=individual_linewidth)
+                elif comp_name == 'slope':
+                    ax2.plot(x, subject_data, color=fill_color, alpha=individual_alpha, 
+                            linewidth=individual_linewidth)
+                elif comp_name == 'behavioral':
+                    ax3.plot(x, subject_data, color=fill_color, alpha=individual_alpha, 
+                            linewidth=individual_linewidth)
         
+        # Then plot the mean on top
         if component_type == 'periodic':
-            if comp_name == 'alpha':
+            if comp_name == 'mu':
                 ax1.plot(x, mean_comp, color=mean_color, linewidth=mean_width, label='Mean')
-                ax1.fill_between(x, mean_comp - ci_95, mean_comp + ci_95, 
-                               color=fill_color, alpha=fill_alpha, label='95% CI')
-            elif comp_name == 'beta':
-                ax2.plot(x, mean_comp, color=mean_color, linewidth=mean_width, label='Mean')
-                ax2.fill_between(x, mean_comp - ci_95, mean_comp + ci_95,
-                               color=fill_color, alpha=fill_alpha, label='95% CI')
             elif comp_name == 'behavioral':
                 ax3.plot(x, mean_comp, color=mean_color, linewidth=mean_width, label='Mean')
-                ax3.fill_between(x, mean_comp - ci_95, mean_comp + ci_95,
-                               color=fill_color, alpha=fill_alpha, label='95% CI')
         else:
             if comp_name == 'offset':
                 ax1.plot(x, mean_comp, color=mean_color, linewidth=mean_width, label='Mean')
-                ax1.fill_between(x, mean_comp - ci_95, mean_comp + ci_95,
-                               color=fill_color, alpha=fill_alpha, label='95% CI')
             elif comp_name == 'slope':
                 ax2.plot(x, mean_comp, color=mean_color, linewidth=mean_width, label='Mean')
-                ax2.fill_between(x, mean_comp - ci_95, mean_comp + ci_95,
-                               color=fill_color, alpha=fill_alpha, label='95% CI')
             elif comp_name == 'behavioral':
                 ax3.plot(x, mean_comp, color=mean_color, linewidth=mean_width, label='Mean')
-                ax3.fill_between(x, mean_comp - ci_95, mean_comp + ci_95,
-                               color=fill_color, alpha=fill_alpha, label='95% CI')
     
     # Set labels and titles
     if component_type == 'periodic':
-        ax1.set_title('Alpha Power')
-        ax2.set_title('Beta Power')
+        ax1.set_title('Alpha-beta Power')
     else:
         ax1.set_title('Aperiodic Offset')
         ax2.set_title('Aperiodic Slope')
@@ -575,21 +581,21 @@ def plot_multi_subject_components_unlocked(subjects_data: Dict,
     ax3.set_title('Behavioral Performance')
     
     ax1.axhline(y=0, color='black', linestyle='--', alpha=0.5, linewidth=2)
-    ax2.axhline(y=0, color='black', linestyle='--', alpha=0.5, linewidth=2)
     
     ax1.set_ylim(-60, 60)
-    ax2.set_ylim(-60, 60)
     ax3.set_ylim(1, 12)
-    ax1.set_ylabel('Change from reference (%)')
-    ax2.set_ylabel('Change from reference (%)')
+    ax1.set_ylabel('Change from Baseline (block 0) (%)')
+    ax3.set_ylabel('Number of items recalled')  # Added ylabel for behavioral plot
     
-    for ax in [ax1, ax2, ax3]:
+    # Set x-axis limits and ticks to show all 12 blocks
+    for ax in [ax1, ax3]:
         ax.set_xlabel('Block Number')
+        ax.set_xlim(-0.5, 11.5)  # Show from block 0 to block 11
+        ax.set_xticks(range(12))  # Set ticks for all 12 blocks
         ax.grid(True)
         ax.legend()
     
     return fig
-
 
 def normalize_measures(measure, window_size):
     measure = np.array(measure, dtype=float)
@@ -625,23 +631,19 @@ def extract_periodic_components(frequencies, spectrum, freq_range=[1, 50]):
     fm.fit(frequencies, spectrum, freq_range)
     
     # Define frequency bands
-    alpha_range = (8, 13)
-    beta_range = (13, 30)
+    mu_range = (8, 15)
     
     # Get peaks in alpha and beta bands
     alpha_peak = None
-    beta_peak = None
     
     for peak in fm.peak_params_:
         freq, power, width = peak
-        if alpha_range[0] <= freq <= alpha_range[1]:
+        if mu_range[0] <= freq <= mu_range[1]:
             alpha_peak = power
-        elif beta_range[0] <= freq <= beta_range[1]:
-            beta_peak = power
+
     
     return {
-        'alpha': alpha_peak if alpha_peak is not None else 0,
-        'beta': beta_peak if beta_peak is not None else 0,
+        'mu': alpha_peak if alpha_peak is not None else 0,
         'aperiodic_offset': fm.aperiodic_params_[0],
         'aperiodic_slope': fm.aperiodic_params_[1]
     }
