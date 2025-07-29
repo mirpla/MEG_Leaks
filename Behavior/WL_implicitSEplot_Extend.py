@@ -132,6 +132,8 @@ def process_WL_data(m = 0, min_seq_length=2, plot_flag=0):
     script_dir = Path(__file__).resolve()
     data_path = script_dir.parent.parent.parent.parent / 'Data'
 
+    print(f'Data path: {data_path}')
+    
     # load relevant information for behavioral analysis from central csv
     sub_info = pd.read_csv(data_path / 'Subject_Information.csv',encoding='ISO-8859-1')
     rel_info = pd.DataFrame({
@@ -155,8 +157,12 @@ def process_WL_data(m = 0, min_seq_length=2, plot_flag=0):
     for i, sub in enumerate(sub_folders):
         ses_folders = ['ses-1']#,'ses-2'] # only analyse 'ses-1' data   
         sub_number = int(sub.split('-')[1]) # Extract subject number
-    
-        idx = np.where(rel_info['sub'] == sub )[0][0] # find the condition
+        try:
+            idx = np.where(rel_info['sub'] == sub )[0][0] # find the condition
+        except:
+            print(f'Subject {sub} not found. Skipping.')
+            continue
+        
         ses_number = rel_info['Order'][idx] # find the right index to extract condition
     
         if sub_number < 10:# first 9 had a different process with 2 session etc 

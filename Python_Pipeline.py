@@ -19,31 +19,31 @@ from meg_analysis.Tools.Audio_Read import export_meg_audio
 # Import the Raw MEG data and MRI's and perform Tsss and other first run preprocessing 
 # MAKE SURE TO RUN AS ADMINISTRATOR!
 # give number as string 
-sub_codes = ['69'] # 61  still need 1 and 9, 9 has a naming problem
+sub_codes = ['76'] # 61  still need 1 and 9, 9 has a naming problem
 Import_Data(sub_codes)
 
-#%%
-subs = ['sub-68'] # 'sub-XX'
-coreg_subs(subs)
-
-# %% 
+# %%  
 # First run of preprocessing - HP filtering, downsampling and ICA
  
 Preprocess_Data()
 #Preprocess_Data_Artf()
 
+#%%
+subs = ['sub-76'] # 'sub-XX'
+coreg_subs(subs)
+
 # %% 
 # Look at ICA components and write down which ones to exclude in a separate .csv (Data\ICA_Components.csv)
 ses = 0 # select session for checking ICA (ses 1 == 0; ses 2 == 1)
-sub = Path('//analyse7/project0407/Data/sub-68') # select the subject folder to look at
+sub = Path('//analyse7/project0407/Data/sub-76') # select the subject folder to look at
 rstate = 100 # select the seed 100 is notchfiltered 97 was not 
 check_ICA_comp(sub, ses, rstate)
 
 # %% 
 # Reject the ICA components and apply a 100 Hz lp filter now that ICA components have been rejected
 
-apply_ICA(rstate)
-# %% 
+apply_ICA(rstate, start_sub='76', single_sub=True)
+# %%
 # Remove Artefacts left over after ICA
 # optional parameters: 
 #    redo_flag: indicates whether all subjects should be processed/re-processed (1) or not (0)
@@ -51,34 +51,43 @@ apply_ICA(rstate)
 #    start_sub: optional parameter to specify starting subject (format: "XX" where XX is the subject number, e.g., "05")
 #    single_sub: if True, only process the specified start_sub. If False, continue processing subsequent subjects (default: False)
 
-Artifacts_Manual(redo_flag=1, rstate=100, start_sub="66", single_sub=True)
+Artifacts_Manual(redo_flag=0, rstate=100, start_sub="76", single_sub=False)
 
-# %% --------------------------------------------------------------------
+#  --------------------------------------------------------------------
 # Rest analyses:
 script_path = Path('Z:\meg_analysis\Scripts\Preprocessing') # giving the path to the script manually, because the other way keeps defaulting to \\analyse7 instead of Z:
-Crop_Rest_Events(script_path,['sub-66','sub-67','sub-68'],False)
-#%% 
+Crop_Rest_Events(script_path,['sub-76'],True)
+# 
 # Make the Epochs
 epoch_dur = 4 # epoch window size in seconds
 sessions = ['ses-1'] # give options for two sessions; session 2 not impmlemented yet though
-Epoch_Rest(script_path, epoch_dur,['sub-65','sub-66','sub-67','sub-68'], sessions, False)
+Epoch_Rest(script_path, epoch_dur,None, sessions, True)
 
 #%% Contains Python pipeline analyses for resting state data source reconstruction, analysis and plotting
 # meg_analysis.Scripts.Rest_Analyses.Rest_Analysis --- Rest_Analysis
 
 # %% --------------------------------------------------------------------
-# SRT analyses:
+# MEG SRT analyses:
+from pathlib import Path
+from meg_analysis.Scripts.Preprocessing.Preproc_SRT import Epoch_SRT
+
 script_path = Path('Z:\meg_analysis\Scripts\Preprocessing') # giving the path to the script manually, because the other way keeps defaulting to \\analyse7 instead of Z:
 lock = 'resp' # stimulus locked or response locked processing 'stim' or 'resp'
 if lock == 'stim':
     pre  = 0.4
     post = 1
 elif lock == 'resp': 
-    pre = 0.8   # pre-stimulus time in seconds    
-    post = 0.6  # post-stimulus time in seconds
-
-sessions = ['ses-1'] # give options for two sessions; session 2 not impmlemented yet though
-Epoch_SRT(script_path, pre, post, lock, sessions, False, subs = None)
+    pre = 0.5   # pre-stimulus time in seconds    
+    post = 0.4  # post-stimulus time in seconds
+# weird 42 55 64
+Epoch_SRT(script_dir = script_path, 
+          seed = 100,
+          lock = lock, 
+          pre_window = pre, 
+          post_window = post, 
+          bl_size = 0.2,
+          sub_folders = None, # None for all subjects or list of subjects  
+          overwrite_epochs=False)
 
 # %% Behavioral Analysis -----------------------------------------------
 # WL Behavior -------------------------------------------------------
@@ -87,7 +96,7 @@ from meg_analysis.Scripts.Behavior.WL_implicitSEplot_Extend import process_WL_da
 wl = {}
 wl['data'] = []
 wl['names'] = []
-wl['data'], wl['names'] = process_WL_data(m=0, min_seq_length=2, plot_flag=1)
+wl['data'], wl['names'] = process_WL_data(m=1, min_seq_length=2, plot_flag=1)
 
 # %% SRT Behavior 
 # for full SRT analysis see: meg_analysis.Scripts.Behavior.SRT_Analysis 

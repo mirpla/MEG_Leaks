@@ -6,10 +6,11 @@ import glob
 import numpy as np
 from pathlib import Path
 from meg_analysis.Scripts.Preprocessing.Preproc_Functions import find_anot_onset
+
 # %% 
 def Crop_Rest_Events(script_dir, sub_folders = None, Overwrite = False):
     '''
-    Crop the full length data files into the relevant rest periods.
+    Crop the individual block files into the relevant rest periods.
     Include pre-annotated bad sections from annotation files.
     
     input: 
@@ -25,7 +26,7 @@ def Crop_Rest_Events(script_dir, sub_folders = None, Overwrite = False):
     data_path       = base_path / 'Data' # Folder containing the Data
     warning_path    = data_path /"event_warnings_rest.txt"
     
-    reg_pattern = re.compile(r'^sub-\d{2}$') # creat regular expression pattern to identify folders of processed subjects
+    reg_pattern = re.compile(r'^sub-\d{2}$') # create regular expression pattern to identify folders of processed subjects
     if sub_folders is None:
         sub_folders = [d for d in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, d)) and reg_pattern.match(d)] # find the folders starting with sub-XX where XX is the subject number with a leading 0
      
@@ -40,36 +41,119 @@ def Crop_Rest_Events(script_dir, sub_folders = None, Overwrite = False):
              
             if ses_path.exists():                
                 orig_path       = f"{ses_path}/{sub}_{ses}_task-SRT_run-1_meg_tsss.fif"
-                data_pattern    = f"{ses_path}/{sub}_{ses}_r{seed}_PostICA_Full.fif"
+                individual_data_path = ses_path / 'individual_post_ica'
+                individual_annot_path = ses_path / 'individual_annotations'
                 
-                # Load annotation file for bad segments
-                annot_file      = f"{ses_path}/{sub}_{ses}_Artf_annot.fif"
+                if not individual_data_path.exists():
+                    print(f"Individual data path does not exist for {sub}/{ses}, skipping.")
+                    continue
+                    
+                if not individual_annot_path.exists():
+                    print(f"Individual annotations path does not exist for {sub}/{ses}, skipping.")
+                    continue
                 
                 event_path_srt  = ses_path / 'events' / f"{sub}_{ses}_task-SRT_run-1_events.npy"# first base-line rest period
                 event_path_wl   = ses_path / 'events' / f"{sub}_{ses}_task-WL_run*_events.npy" # load in the rest of the rest-periods
                 out_dir         = ses_path / 'rest'
                 
-                out_dir.mkdir(exist_ok = True)
+                # Check if event files exist before proceeding
+                if not event_path_srt.exists():
+                    print(f"SRT event file not found for {sub}/{ses}: {event_path_srt}")
+                    continue
                 
                 events_WL_list = glob.glob(str(event_path_wl))
+                if len(events_WL_list) == 0:
+                    print(f"No WL event files found for {sub}/{ses}: {event_path_wl}")
+                    continue
+                
+                out_dir.mkdir(exist_ok = True)
+                
                 events_WL_sort = sorted(events_WL_list, key=lambda x: int(re.search(r'run-(\d+)', x).group(1)))
     
-                # Load the data
-                data = mne.io.read_raw_fif(data_pattern, preload=False)
-                data_anot = data.annotations
-                
-                # Load and apply pre-annotated bad segments if they exist
-                if Path(annot_file).exists():
-                    bad_annotations = mne.read_annotations(annot_file)
-                    data.set_annotations(data.annotations + bad_annotations)
-                    print(f"Applied bad segment annotations from {annot_file}")
-                else:
-                    raise ValueError(f"No bad segment annotations found in {annot_file}")
                 # find the original sampling frequency by reading info of first instance of pre-downsampled data
+                if not Path(orig_path).exists():
+                    print(f"Original data file not found for {sub}/{ses}: {orig_path}")
+                    continue
+                    
                 info_orig   = mne.io.read_info(orig_path)
                 orig_sf     = info_orig['sfreq']
                 
                 # %% SRT Baseline
+                # Load SRT data and annotations
+                srt_data_file = individual_data_path / f"{sub}_{ses}_task-SRT_run-1_meg_tsss_notch-ds-500Hz_post_ica_r{seed}_.fif"
+                srt_annot_file = individual_annot_path / f"{sub}_{ses}_task-SRT_run-1_meg_tsss_notch-ds-500Hz_post_ica_r{seed}_artf_annot.fif"
+                
+                if not srt_data_file.exists():
+                    print(f"SRT data file not found: {srt_data_file}")
+                    continue
+                    
+                if not srt_annot_file.exists():
+                    print(f"SRT annotation file not found: {srt_annot_file}")
+                    continue
+                
+                # Load the SRT data
+                data = mne.io.read_raw_fif(srt_data_file, preload=False)
+                data_anot = data.annotations
+                
+                # Load and apply pre-annotated bad segments with proper handling
+                try:
+                    bad_annotations = mne.read_annotations(srt_annot_file)
+                    print(f"Loaded {len(bad_annotations)} annotations from {srt_annot_file}")
+                    print(f"Original annotation descriptions: {list(set(bad_annotations.description))}")
+                    
+                    # Ensure annotations are marked as "bad" for epoching to work properly
+                    bad_descriptions = []
+                    for desc in bad_annotations.description:
+                        if 'bad' not in desc.lower():
+                            bad_descriptions.append('BAD_' + desc)
+                        else:
+                            bad_descriptions.append(desc)
+                    
+                    # Create new annotations with proper "bad" labels and matching orig_time
+                    corrected_annotations = mne.Annotations(
+                        onset=bad_annotations.onset,
+                        duration=bad_annotations.duration,
+                        description=bad_descriptions,
+                        orig_time=data.info['meas_date']  # Match the data's measurement date
+                    )
+                    
+                    data.set_annotations(data.annotations + corrected_annotations)
+                    print(f"Applied {len(corrected_annotations)} bad annotations to SRT data")
+                    print(f"Total annotations after loading: {len(data.annotations)}")
+                    
+                except Exception as e:
+                    print(f"Error loading SRT annotations from {srt_annot_file}: {e}")
+                    print(f"Trying alternative annotation loading approach...")
+                    
+                    # Alternative approach: replace existing annotations entirely
+                    try:
+                        bad_annotations = mne.read_annotations(srt_annot_file)
+                        
+                        # Ensure annotations are marked as "bad"
+                        bad_descriptions = []
+                        for desc in bad_annotations.description:
+                            if 'bad' not in desc.lower():
+                                bad_descriptions.append('BAD_' + desc)
+                            else:
+                                bad_descriptions.append(desc)
+                        
+                        # Create new annotations with data's orig_time
+                        corrected_annotations = mne.Annotations(
+                            onset=bad_annotations.onset,
+                            duration=bad_annotations.duration,
+                            description=bad_descriptions,
+                            orig_time=data.info['meas_date']
+                        )
+                        
+                        # Replace annotations instead of adding
+                        data.set_annotations(corrected_annotations)
+                        print(f"Replaced annotations with {len(corrected_annotations)} bad annotations")
+                        
+                    except Exception as e2:
+                        print(f"Failed alternative approach: {e2}")
+                        print("Proceeding without annotations for this file")
+                        continue
+                
                 # correct the srt events for sampling rate and locate 217 as the end of the first rest period
                 event_array     = np.load(event_path_srt, allow_pickle=True) # 473 - 1024 column 2
                 event_dict_srt  = event_array.item()
@@ -104,8 +188,17 @@ def Crop_Rest_Events(script_dir, sub_folders = None, Overwrite = False):
                             with open(warning_path, "a") as f:
                                 f.write(warn_message)
                                 f.close()
-                                
+                        
+                        print(f"Cropping SRT from {start_time:.2f}s to {end_time_sc:.2f}s")
                         data.crop(tmin= start_time, tmax = end_time_sc)
+                        
+                        # Check annotations after cropping
+                        print(f"Annotations after cropping SRT: {len(data.annotations)}")
+                        bad_annots_after = [desc for desc in data.annotations.description if 'bad' in desc.lower() or 'BAD' in desc]
+                        print(f"Bad annotations after cropping: {len(bad_annots_after)}")
+                        if len(bad_annots_after) > 0:
+                            print(f"Bad annotation descriptions: {set(bad_annots_after)}")
+                        
                         data.save(srt_rest_file, overwrite=True)
                         del data
                     
@@ -125,7 +218,14 @@ def Crop_Rest_Events(script_dir, sub_folders = None, Overwrite = False):
                             f.write(warn_message)
                             f.close()
                         
+                        print(f"Cropping SRT (late start) from {start_time:.2f}s to {end_time:.2f}s")
                         data.crop(tmin= start_time, tmax = end_time)
+                        
+                        # Check annotations after cropping
+                        print(f"Annotations after cropping SRT (late): {len(data.annotations)}")
+                        bad_annots_after = [desc for desc in data.annotations.description if 'bad' in desc.lower() or 'BAD' in desc]
+                        print(f"Bad annotations after cropping: {len(bad_annots_after)}")
+                        
                         data.save(srt_rest_file, overwrite=True)
                         del data
                                              
@@ -133,11 +233,87 @@ def Crop_Rest_Events(script_dir, sub_folders = None, Overwrite = False):
                 # do the same but for the WL. the first block contains a second rest period, for the rest extract the rest period at the end of the blocks
                 wl_pattern  = r'WL_run-\d+'
                 for blck, event_file, in enumerate(events_WL_sort):
-                    # load in data again after wl or srt cropping; Not time efficient but done for RAM reasons
-                    data = mne.io.read_raw_fif(data_pattern, preload=False)
+                    # Extract run number from event file
+                    run_match = re.search(r'run-(\d+)', event_file)
+                    if not run_match:
+                        print(f"Could not extract run number from {event_file}")
+                        continue
+                    run_num = run_match.group(1)
                     
-                    bad_annotations = mne.read_annotations(annot_file)
-                    data.set_annotations(data.annotations + bad_annotations)
+                    # Load corresponding WL data and annotation files
+                    wl_data_file = individual_data_path / f"{sub}_{ses}_task-WL_run-{run_num}_meg_tsss_notch-ds-500Hz_post_ica_r{seed}_.fif"
+                    wl_annot_file = individual_annot_path / f"{sub}_{ses}_task-WL_run-{run_num}_meg_tsss_notch-ds-500Hz_post_ica_r{seed}_artf_annot.fif"
+                    
+                    if not wl_data_file.exists():
+                        print(f"WL data file not found: {wl_data_file}")
+                        continue
+                        
+                    if not wl_annot_file.exists():
+                        print(f"WL annotation file not found: {wl_annot_file}")
+                        continue
+                    
+                    # load in data for current WL run
+                    data = mne.io.read_raw_fif(wl_data_file, preload=False)
+                    data_anot = data.annotations
+                    
+                    # Load and apply pre-annotated bad segments with proper handling
+                    try:
+                        bad_annotations = mne.read_annotations(wl_annot_file)
+                        print(f"Loaded {len(bad_annotations)} annotations from {wl_annot_file}")
+                        print(f"Original annotation descriptions: {list(set(bad_annotations.description))}")
+                        
+                        # Ensure annotations are marked as "bad" for epoching to work properly
+                        bad_descriptions = []
+                        for desc in bad_annotations.description:
+                            if 'bad' not in desc.lower():
+                                bad_descriptions.append('BAD_' + desc)
+                            else:
+                                bad_descriptions.append(desc)
+                        
+                        # Create new annotations with proper "bad" labels and matching orig_time
+                        corrected_annotations = mne.Annotations(
+                            onset=bad_annotations.onset,
+                            duration=bad_annotations.duration,
+                            description=bad_descriptions,
+                            orig_time=data.info['meas_date']  # Match the data's measurement date
+                        )
+                        
+                        data.set_annotations(data.annotations + corrected_annotations)
+                        print(f"Applied {len(corrected_annotations)} bad annotations to WL run-{run_num}")
+                        print(f"Total annotations after loading WL run-{run_num}: {len(data.annotations)}")
+                        
+                    except Exception as e:
+                        print(f"Error loading WL annotations from {wl_annot_file}: {e}")
+                        print(f"Trying alternative annotation loading approach...")
+                        
+                        # Alternative approach: replace existing annotations entirely
+                        try:
+                            bad_annotations = mne.read_annotations(wl_annot_file)
+                            
+                            # Ensure annotations are marked as "bad"
+                            bad_descriptions = []
+                            for desc in bad_annotations.description:
+                                if 'bad' not in desc.lower():
+                                    bad_descriptions.append('BAD_' + desc)
+                                else:
+                                    bad_descriptions.append(desc)
+                            
+                            # Create new annotations with data's orig_time
+                            corrected_annotations = mne.Annotations(
+                                onset=bad_annotations.onset,
+                                duration=bad_annotations.duration,
+                                description=bad_descriptions,
+                                orig_time=data.info['meas_date']
+                            )
+                            
+                            # Replace annotations instead of adding
+                            data.set_annotations(corrected_annotations)
+                            print(f"Replaced annotations with {len(corrected_annotations)} bad annotations")
+                            
+                        except Exception as e2:
+                            print(f"Failed alternative approach: {e2}")
+                            print("Proceeding without annotations for this file")
+                            continue
                     
                     event_array     = np.load(event_file, allow_pickle=True) # WL 1 = start - 217 | WL rest = 256 - 217/end
                     event_dict_wl   = event_array.item()
@@ -148,6 +324,7 @@ def Crop_Rest_Events(script_dir, sub_folders = None, Overwrite = False):
                     wl_onset    = find_anot_onset(data_anot,wl_target.group(0))
                     
                     out_name    = Path(event_file).name[:-16] # make basis for the path-names       
+                    
                     # %% WL Baseline 
                     # locate first wl rest period
                     if Path(event_file) == (ses_path / 'events' / f'{sub}_{ses}_task-WL_run-1_events.npy'):
@@ -168,17 +345,72 @@ def Crop_Rest_Events(script_dir, sub_folders = None, Overwrite = False):
                                 with open(warning_path, "a") as f:
                                     f.write(f"Warning: WL PRE is shorter than 180 seconds for {sub}, {ses}.\n")
                                     f.close()
-                            data.crop(tmin= start_time + wl_onset[0], tmax = end_time+wl_onset[0])    
+                            
+                            print(f"Cropping WL baseline from {start_time + wl_onset[0]:.2f}s to {end_time+wl_onset[0]:.2f}s")
+                            data.crop(tmin= start_time + wl_onset[0], tmax = end_time+wl_onset[0])
+                            
+                            # Check annotations after cropping
+                            print(f"WL baseline annotations after cropping: {len(data.annotations)}")
+                            bad_annots_after = [desc for desc in data.annotations.description if 'bad' in desc.lower() or 'BAD' in desc]
+                            print(f"Bad annotations after cropping: {len(bad_annots_after)}")
+                            if len(bad_annots_after) > 0:
+                                print(f"Bad annotation descriptions: {set(bad_annots_after)}")
+                            
                             data.save(wl_bl_file, overwrite=True)                           
                             del data
                             
                         
                     # %% WL Rest
-                    #Reload the original data to avoid memory issues
-                    data = mne.io.read_raw_fif(data_pattern, preload=False)
+                    #Reload the WL data for the rest processing
+                    data = mne.io.read_raw_fif(wl_data_file, preload=False)
                     
-                    bad_annotations = mne.read_annotations(annot_file)
-                    data.set_annotations(data.annotations + bad_annotations)
+                    # Reapply annotations for the rest processing
+                    try:
+                        bad_annotations = mne.read_annotations(wl_annot_file)
+                        
+                        # Ensure annotations are marked as "bad" for epoching to work properly
+                        bad_descriptions = []
+                        for desc in bad_annotations.description:
+                            if 'bad' not in desc.lower():
+                                bad_descriptions.append('BAD_' + desc)
+                            else:
+                                bad_descriptions.append(desc)
+                        
+                        # Create new annotations with proper "bad" labels and matching orig_time
+                        corrected_annotations = mne.Annotations(
+                            onset=bad_annotations.onset,
+                            duration=bad_annotations.duration,
+                            description=bad_descriptions,
+                            orig_time=data.info['meas_date']  # Match the data's measurement date
+                        )
+                        
+                        data.set_annotations(data.annotations + corrected_annotations)
+                        
+                    except Exception as e:
+                        print(f"Error reloading WL annotations: {e}")
+                        # Try alternative approach
+                        try:
+                            bad_annotations = mne.read_annotations(wl_annot_file)
+                            
+                            bad_descriptions = []
+                            for desc in bad_annotations.description:
+                                if 'bad' not in desc.lower():
+                                    bad_descriptions.append('BAD_' + desc)
+                                else:
+                                    bad_descriptions.append(desc)
+                            
+                            corrected_annotations = mne.Annotations(
+                                onset=bad_annotations.onset,
+                                duration=bad_annotations.duration,
+                                description=bad_descriptions,
+                                orig_time=data.info['meas_date']
+                            )
+                            
+                            data.set_annotations(corrected_annotations)
+                            
+                        except Exception as e2:
+                            print(f"Failed to load annotations for WL rest processing: {e2}")
+                            continue
                    
                     if time_wl.size != 0:
                         idx_wl          = np.where(event_dict_wl['STI101'][:, 2] == 256)[0][0]
@@ -193,7 +425,7 @@ def Crop_Rest_Events(script_dir, sub_folders = None, Overwrite = False):
                     wl_rest_file    = out_dir / Path(out_name+ f'rest-{blck+1}_meg.fif') # path-name for the rest period for the corresponding block
                     
                     if wl_rest_file.exists() and Overwrite == False:
-                        print(f'Skipping: {sub}-{ses}-block{blck+1}-WL_BL; file already exists')                       
+                        print(f'Skipping: {sub}-{ses}-block{blck+1}-WL_REST; file already exists')                       
                         continue
                     
                     if end_time > wl_onset[1]: # make sure recording wasn't terminated prematurely in rest period
@@ -219,15 +451,25 @@ def Crop_Rest_Events(script_dir, sub_folders = None, Overwrite = False):
                         with open(warning_path, "a") as f:
                             f.write(warn_message)
                             f.close()
+                        
+                        print(f"Cropping WL rest (short) from {start_time+wl_onset[0]:.2f}s to {data.times[-1]:.2f}s")
                         data.crop(tmin= (start_time+wl_onset[0]), tmax = (data.times[-1]))
                     
                     else:
+                        print(f"Cropping WL rest from {start_time+wl_onset[0]:.2f}s to {end_time+wl_onset[0]:.2f}s")
                         data.crop(tmin= (start_time+wl_onset[0]), tmax = (end_time+wl_onset[0]))
+                    
+                    # Check annotations after cropping
+                    print(f"WL rest annotations after cropping: {len(data.annotations)}")
+                    bad_annots_after = [desc for desc in data.annotations.description if 'bad' in desc.lower() or 'BAD' in desc]
+                    print(f"Bad annotations after cropping: {len(bad_annots_after)}")
+                    if len(bad_annots_after) > 0:
+                        print(f"Bad annotation descriptions: {set(bad_annots_after)}")
                     
                     data.save(wl_rest_file, overwrite=True)
                     del data
                     
-                    print(f"next {event_file}")
+                    print(f"Processed {event_file}")
                     
 
 # %% Epoch the Data
@@ -251,7 +493,7 @@ def Epoch_Rest(script_dir, epoch_dur, sub_folders = None, ses_folders=None, Over
     base_path       = script_dir.parent.parent.parent # Root folder
     data_path       = base_path / 'Data' # Folder containing the Data
     
-    reg_pattern = re.compile(r'^sub-\d{2}$') # creat regular expression pattern to identify folders of processed subjects    
+    reg_pattern = re.compile(r'^sub-\d{2}$') # create regular expression pattern to identify folders of processed subjects    
     if sub_folders is None:
         sub_folders = [d for d in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, d)) and reg_pattern.match(d)] # find the folders starting with sub-XX where XX is the subject number with a leading 0
 
@@ -268,7 +510,7 @@ def Epoch_Rest(script_dir, epoch_dur, sub_folders = None, ses_folders=None, Over
             if ses_path.exists():               
                 rest_dir = ses_path / 'rest'
                 
-                if not rest_dir.exists() and Overwrite == False:
+                if not rest_dir.exists():
                     print(f"Rest directory does not exist for {sub}/{ses}, skipping.")
                     continue
                 
@@ -293,8 +535,12 @@ def Epoch_Rest(script_dir, epoch_dur, sub_folders = None, ses_folders=None, Over
                             print(f"Processing {data_file}")
                             data = mne.io.read_raw_fif(data_file)
                             
-                            # Annotations should already be applied from the cropping step
-                            # No need to reapply them here
+                            # Check what annotations are present before epoching
+                            print(f"Annotations before epoching: {len(data.annotations)}")
+                            bad_annots = [desc for desc in data.annotations.description if 'bad' in desc.lower() or 'BAD' in desc]
+                            print(f"Bad annotations before epoching: {len(bad_annots)}")
+                            if len(bad_annots) > 0:
+                                print(f"Bad annotation descriptions: {set(bad_annots)}")
                             
                             sfreq = data.info['sfreq']
                             epoch_len = int(epoch_dur * sfreq)
@@ -312,7 +558,7 @@ def Epoch_Rest(script_dir, epoch_dur, sub_folders = None, ses_folders=None, Over
                                                    reject_by_annotation=True)
                             
                             data_epoch.save(out_file, overwrite=True)
-                            print(f"Saved {out_file} with {len(data_epoch)}/{epoch_n} epochs")
+                            print(f"Saved {out_file} with {len(data_epoch)}/{epoch_n} epochs (rejected {epoch_n - len(data_epoch)} epochs)")
                         else: 
                             print(f'File {data_file.name} not found, skipping')
                     else:

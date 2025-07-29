@@ -4,9 +4,17 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import matplotlib.pyplot as plt
+import h5py
+import pickle
 
-from meg_analysis.Scripts.Behavior.WL_implicitSEplot_Extend import process_WL_data
+from Scripts.Behavior.WL_implicitSEplot_Extend import process_WL_data
+import sys
+import os
 
+# Automatically find and add project root (e.g., 'meg_analysis') to sys.path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 #%%
 def process_subject(files, power):
     """
@@ -29,7 +37,7 @@ def process_subject(files, power):
     
     # Extract subject ID from filename
     subject_id = files[0].stem[0:6]
-    print(f"\n--- Processing Subject Files for: {subject_id} ---")
+    print(f'\n--- Processing Subject Files for: {subject_id} ---')
 
     block_average = {}
     baseline_power = None
@@ -71,6 +79,113 @@ def process_subject(files, power):
     return results, info
 
 #%%
+def save_topomap_figure(fig, output_path, condition, sensor, figure_type):
+    """
+    Save topographic map figure in multiple formats.
+    
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        Figure to save
+    output_path : Path
+        Directory to save figures
+    condition : str
+        Condition name (e.g., 'Congruent', 'Incongruent', 'Difference')
+    sensor : str
+        Sensor type (e.g., 'grad', 'mag')
+    figure_type : str
+        Type of figure for filename
+    """
+    # Create plots subdirectory
+    plots_dir = output_path / 'plots'
+    plots_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate filename
+    filename_base = f"{condition}_{sensor}_{figure_type}"
+    
+    # Save in multiple formats
+    fig.savefig(plots_dir / f"{filename_base}.png", dpi=300, bbox_inches='tight')
+    fig.savefig(plots_dir / f"{filename_base}.pdf", bbox_inches='tight')
+    
+    print(f"Saved plots: {filename_base}.png and {filename_base}.pdf")
+
+#%%
+def save_results_to_hdf5(results, info, output_path, sensor, power_band_name):
+    """
+    Save results and info to HDF5 file for future plotting.
+    
+    Parameters
+    ----------
+    results : dict
+        Dictionary containing all sensor results
+    info : mne.Info
+        MNE info object
+    output_path : Path
+        Directory to save HDF5 file
+    sensor : str
+        Sensor type
+    power_band_name : str
+        Name of the power band
+    """
+    hdf5_file = output_path / f"sensor_{power_band_name}_{sensor}_results.h5"
+    
+    with h5py.File(hdf5_file, 'w') as f:
+        # Save the main results data
+        for condition, condition_data in results.items():
+            cond_group = f.create_group(condition)
+            
+            # Convert condition_data to numpy arrays and save
+            for subject_idx, subject_data in condition_data.items():
+                if subject_data is not None:
+                    cond_group.create_dataset(f"subject_{subject_idx}", data=np.array(subject_data))
+        
+        # Save info object as pickled string (HDF5 doesn't directly support MNE objects)
+        info_pickled = pickle.dumps(info)
+        f.create_dataset('info', data=np.void(info_pickled))
+        
+        # Save metadata
+        f.attrs['sensor_type'] = sensor
+        f.attrs['power_band'] = power_band_name
+        f.attrs['description'] = 'MEG sensor analysis results with topographic data'
+        
+    print(f"Results saved to: {hdf5_file}")
+
+#%%
+def load_results_from_hdf5(hdf5_file):
+    """
+    Load results and info from HDF5 file.
+    
+    Parameters
+    ----------
+    hdf5_file : Path or str
+        Path to HDF5 file
+        
+    Returns
+    -------
+    tuple
+        (results_dict, info_object)
+    """
+    with h5py.File(hdf5_file, 'r') as f:
+        # Load results
+        results = {}
+        for condition in f.keys():
+            if condition != 'info':
+                results[condition] = {}
+                cond_group = f[condition]
+                for subject_key in cond_group.keys():
+                    subject_idx = int(subject_key.split('_')[1])
+                    results[condition][subject_idx] = cond_group[subject_key][:]
+        
+        # Load info object
+        info_pickled = f['info'][()]
+        info = pickle.loads(info_pickled.tobytes())
+        
+        # Load metadata
+        metadata = dict(f.attrs)
+        
+    return results, info, metadata
+
+#%%
 def process_all_subjects(base_path, power):
     """
     Process all subject files and compute power averages.
@@ -103,10 +218,12 @@ def process_all_subjects(base_path, power):
     sensors = ['grad','mag'] #grad
     
     all_sensor_results = {}
+    power_band_name = list(power.keys())[0]
+    
     for sensor in sensors:
         all_results = {}
         file_pattern = f"sub-*{sensor}_spectrum.h5"  # Adjust pattern as needed
-        output_file = output_path / f"sensor_{list(power.keys())[0]}_{sensor}_averages.h5"
+        output_file = output_path / f"sensor_{power_band_name}_{sensor}_averages.h5"
         
         # check for existing output file and skip if not overwriting
         if output_file.exists() and input(f"\n{output_file.name} exists. Overwrite? (y/n): ").strip().lower() != 'y':
@@ -168,11 +285,11 @@ def process_all_subjects(base_path, power):
             cond_average = np.mean(stacked_data, axis=0)    
 
             # Center colormap around zero for proper baseline visualization
-            vmin = -0.3
-            vmax = 0.3
-            # abs_max = np.max(np.abs(cond_average))
-            # vmin = -abs_max
-            # vmax = abs_max
+            # vmin = -0.3
+            # vmax = 0.3
+            abs_max = np.max(np.abs(cond_average))
+            vmin = -abs_max
+            vmax = abs_max
 
             fig, axes = plt.subplots(1, 4, figsize=(22, 6))
             fig.suptitle(f'Topographic Maps - {ConIn.capitalize()} Condition', fontsize=16)
@@ -192,14 +309,18 @@ def process_all_subjects(base_path, power):
                 axes[block].set_title(f'{block_names[block]}', fontsize=14)
 
             # Add colorbar
-            cbar = fig.colorbar(im, ax=axes, orientation='horizontal', pad=0.1, shrink=0.8)
+            cbar_ax = fig.add_axes([0.15, 0.02, 0.7, 0.03])  # [left, bottom, width, height]
+            cbar = fig.colorbar(im, cax=cbar_ax, orientation='horizontal')
+            cbar.set_label('Power Change (% from baseline)', fontsize=12)
             cbar.set_label('Power Change (% from baseline)', fontsize=12)
 
             # Print values for console reference
             print(f"Color scale: {vmin:.3f} to {vmax:.3f} (centered on zero)")
 
-            plt.tight_layout()
-            plt.show()    
+            # Save the figure
+            save_topomap_figure(fig, output_path, ConIn, sensor, 'topomaps')
+            
+            plt.tight_layout()   
             
         Con_data    =  cond_data['Congruent'] 
         InCon_data  =  cond_data['Incongruent']
@@ -214,9 +335,9 @@ def process_all_subjects(base_path, power):
         
         Diff_average = Con_average - Incon_average
         
-        # abs_max = np.max(np.abs(Diff_average))
-        # vmin = -abs_max
-        # vmax = abs_max
+        abs_max = np.max(np.abs(Diff_average))
+        vmin = -abs_max
+        vmax = abs_max
         
         fig, axes = plt.subplots(1, 4, figsize=(20, 5))
         fig.suptitle(f'Topographic Maps - Congruent-Incongruent Condition', fontsize=16)
@@ -239,16 +360,24 @@ def process_all_subjects(base_path, power):
         cbar = fig.colorbar(im, ax=axes, orientation='horizontal', pad=0.1, shrink=0.8)
         cbar.set_label('Power Change (% from baseline)', fontsize=12)
         
+        # Save the difference plot
+        save_topomap_figure(fig, output_path, 'Difference', sensor, 'topomaps')
+        
+        plt.tight_layout()
+        
         all_sensor_results[sensor] = cond_data
+        
+        # Save results to HDF5 file
+        save_results_to_hdf5(cond_data, info, output_path, sensor, power_band_name)
    
     return all_sensor_results
 
 #%% 
 if __name__ == "__main__":
-    ALPHA_BETA_BAND = {'alpha-beta': (7, 15)}
+    ALPHA_BETA_BAND = {'alpha-beta': (8, 14)}
     
     # Set your paths and parameters
-    base_path = Path("Z:\Data\derivatives\spectral_analysis")  # Update this path
+    base_path = Path("Z:/Data/derivatives/spectral_analysis")  # Update this path
     
     # Process all subjects
     results = process_all_subjects(
@@ -256,5 +385,12 @@ if __name__ == "__main__":
         power = ALPHA_BETA_BAND,
     )
     
+    # Example of how to load the saved data later for quick plotting:
+    # output_path = base_path / 'averages'
+    # hdf5_file = output_path / "sensor_alpha-beta_grad_results.h5"
+    # if hdf5_file.exists():
+    #     loaded_results, loaded_info, metadata = load_results_from_hdf5(hdf5_file)
+    #     print(f"Loaded data for sensor type: {metadata['sensor_type']}")
+    #     print(f"Power band: {metadata['power_band']}")
 
 # %%

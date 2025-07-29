@@ -31,7 +31,7 @@ def Preprocess_Data():
     
     # %% other parameters
     param_res_Fs    = 500   # frequency that data is downsampled to
-    param_filt_hp   = 1     # filter parameters highpass
+    param_filt_hp   = 0.1     # filter parameters highpass
     #param_filt_lp   = 100   # filter parameters lowpass | better after ICA
     
     rstate = 100 # Seed for the ICA (see below)

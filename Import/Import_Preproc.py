@@ -175,7 +175,7 @@ def MakeBoundaryElementModel(mri_path,meg_path):
     # Visualize surfaces - works EVEN IF previous BEM step failed
     plot_bem_kwargs = dict(
         subject=subject_id, subjects_dir=local_dir,
-        brain_surfaces='white', orientation='coronal',
+        brain_surfaces='pial', orientation='coronal',
         slices=[50,75, 100,125,130, 150,160,175])
     
     
