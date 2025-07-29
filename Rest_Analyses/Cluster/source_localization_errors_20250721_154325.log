@@ -1,0 +1,23 @@
+2025-07-21 15:43:25,412 - INFO - Starting source localization for 6 subjects
+2025-07-21 15:43:25,412 - INFO - Error log will be saved to: /analyse/Project0407/meg_analysis/Scripts/Rest_Analyses/Cluster/source_localization_errors_20250721_154325.log
+2025-07-21 15:43:25,412 - INFO - [1/6] Processing sub-69
+2025-07-21 15:43:48,903 - ERROR - [1/6] Error processing sub-69: trans file "/analyse/Project0407/Data/sub-69/anat/bem/sub-69-ses-1-trans.fif" not found
+2025-07-21 15:43:48,915 - INFO - [2/6] Processing sub-70
+2025-07-21 16:30:06,938 - INFO - [2/6] sub-70 completed successfully
+2025-07-21 16:30:06,942 - INFO - [3/6] Processing sub-71
+2025-07-21 17:53:31,955 - INFO - [3/6] sub-71 completed successfully
+2025-07-21 17:53:31,956 - INFO - [4/6] Processing sub-72
+2025-07-21 18:59:35,948 - INFO - [4/6] sub-72 completed successfully
+2025-07-21 18:59:35,957 - INFO - [5/6] Processing sub-73
+2025-07-21 19:58:46,407 - INFO - [5/6] sub-73 completed successfully
+2025-07-21 19:58:46,416 - INFO - [6/6] Processing sub-74
+2025-07-21 21:21:14,481 - INFO - [6/6] sub-74 completed successfully
+2025-07-21 21:21:14,486 - INFO - ============================================================
+2025-07-21 21:21:14,487 - INFO - FINAL SUMMARY
+2025-07-21 21:21:14,487 - INFO - ============================================================
+2025-07-21 21:21:14,487 - INFO - Successfully processed: 5/6 subjects
+2025-07-21 21:21:14,487 - INFO - Failed: 1/6 subjects
+2025-07-21 21:21:14,488 - INFO - Successful subjects: sub-70, sub-71, sub-72, sub-73, sub-74
+2025-07-21 21:21:14,488 - ERROR - FAILED SUBJECTS:
+2025-07-21 21:21:14,488 - ERROR -   sub-69: trans file "/analyse/Project0407/Data/sub-69/anat/bem/sub-69-ses-1-trans.fif" not found
+2025-07-21 21:21:14,488 - INFO - Detailed log saved to: /analyse/Project0407/meg_analysis/Scripts/Rest_Analyses/Cluster/source_localization_errors_20250721_154325.log

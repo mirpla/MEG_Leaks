@@ -1,0 +1,133 @@
+2025-07-18 18:37:18,577 - INFO - Starting source localization for 61 subjects
+2025-07-18 18:37:18,577 - INFO - Error log will be saved to: /analyse/Project0407/meg_analysis/Scripts/Rest_Analyses/Cluster/source_localization_errors_20250718_183718.log
+2025-07-18 18:37:18,578 - INFO - [1/61] Processing sub-02
+2025-07-18 20:06:16,343 - INFO - [1/61] sub-02 completed successfully
+2025-07-18 20:06:16,354 - INFO - [2/61] Processing sub-04
+2025-07-18 21:34:07,632 - INFO - [2/61] sub-04 completed successfully
+2025-07-18 21:34:07,635 - INFO - [3/61] Processing sub-06
+2025-07-18 22:55:46,423 - INFO - [3/61] sub-06 completed successfully
+2025-07-18 22:55:46,435 - INFO - [4/61] Processing sub-10
+2025-07-19 00:21:25,587 - INFO - [4/61] sub-10 completed successfully
+2025-07-19 00:21:25,589 - INFO - [5/61] Processing sub-11
+2025-07-19 01:47:49,856 - INFO - [5/61] sub-11 completed successfully
+2025-07-19 01:47:49,859 - INFO - [6/61] Processing sub-13
+2025-07-19 03:14:45,806 - INFO - [6/61] sub-13 completed successfully
+2025-07-19 03:14:45,813 - INFO - [7/61] Processing sub-14
+2025-07-19 04:24:46,930 - INFO - [7/61] sub-14 completed successfully
+2025-07-19 04:24:46,934 - INFO - [8/61] Processing sub-15
+2025-07-19 05:49:44,348 - INFO - [8/61] sub-15 completed successfully
+2025-07-19 05:49:44,357 - INFO - [9/61] Processing sub-16
+2025-07-19 07:17:23,997 - INFO - [9/61] sub-16 completed successfully
+2025-07-19 07:17:24,004 - INFO - [10/61] Processing sub-18
+2025-07-19 08:44:19,786 - INFO - [10/61] sub-18 completed successfully
+2025-07-19 08:44:19,788 - INFO - [11/61] Processing sub-20
+2025-07-19 10:10:09,339 - INFO - [11/61] sub-20 completed successfully
+2025-07-19 10:10:09,341 - INFO - [12/61] Processing sub-21
+2025-07-19 11:25:27,737 - INFO - [12/61] sub-21 completed successfully
+2025-07-19 11:25:27,739 - INFO - [13/61] Processing sub-22
+2025-07-19 12:48:40,001 - INFO - [13/61] sub-22 completed successfully
+2025-07-19 12:48:40,005 - INFO - [14/61] Processing sub-23
+2025-07-19 14:00:01,572 - INFO - [14/61] sub-23 completed successfully
+2025-07-19 14:00:01,579 - INFO - [15/61] Processing sub-24
+2025-07-19 15:26:21,150 - INFO - [15/61] sub-24 completed successfully
+2025-07-19 15:26:21,152 - INFO - [16/61] Processing sub-25
+2025-07-19 16:47:22,569 - INFO - [16/61] sub-25 completed successfully
+2025-07-19 16:47:22,574 - INFO - [17/61] Processing sub-26
+2025-07-19 18:06:38,587 - INFO - [17/61] sub-26 completed successfully
+2025-07-19 18:06:38,590 - INFO - [18/61] Processing sub-27
+2025-07-19 19:31:42,412 - INFO - [18/61] sub-27 completed successfully
+2025-07-19 19:31:42,420 - INFO - [19/61] Processing sub-28
+2025-07-19 21:00:33,262 - INFO - [19/61] sub-28 completed successfully
+2025-07-19 21:00:33,280 - INFO - [20/61] Processing sub-29
+2025-07-19 22:15:48,481 - INFO - [20/61] sub-29 completed successfully
+2025-07-19 22:15:48,487 - INFO - [21/61] Processing sub-30
+2025-07-19 23:37:58,612 - INFO - [21/61] sub-30 completed successfully
+2025-07-19 23:37:58,614 - INFO - [22/61] Processing sub-31
+2025-07-20 00:50:48,796 - INFO - [22/61] sub-31 completed successfully
+2025-07-20 00:50:48,799 - INFO - [23/61] Processing sub-32
+2025-07-20 01:57:14,485 - INFO - [23/61] sub-32 completed successfully
+2025-07-20 01:57:14,491 - INFO - [24/61] Processing sub-33
+2025-07-20 03:18:08,102 - INFO - [24/61] sub-33 completed successfully
+2025-07-20 03:18:08,106 - INFO - [25/61] Processing sub-34
+2025-07-20 04:41:37,957 - INFO - [25/61] sub-34 completed successfully
+2025-07-20 04:41:37,959 - INFO - [26/61] Processing sub-35
+2025-07-20 06:02:35,970 - INFO - [26/61] sub-35 completed successfully
+2025-07-20 06:02:35,977 - INFO - [27/61] Processing sub-36
+2025-07-20 07:19:16,448 - INFO - [27/61] sub-36 completed successfully
+2025-07-20 07:19:16,456 - INFO - [28/61] Processing sub-37
+2025-07-20 08:44:07,701 - INFO - [28/61] sub-37 completed successfully
+2025-07-20 08:44:07,706 - INFO - [29/61] Processing sub-38
+2025-07-20 09:50:20,238 - INFO - [29/61] sub-38 completed successfully
+2025-07-20 09:50:20,239 - INFO - [30/61] Processing sub-39
+2025-07-20 11:10:53,070 - INFO - [30/61] sub-39 completed successfully
+2025-07-20 11:10:53,072 - INFO - [31/61] Processing sub-40
+2025-07-20 12:29:05,187 - INFO - [31/61] sub-40 completed successfully
+2025-07-20 12:29:05,193 - INFO - [32/61] Processing sub-42
+2025-07-20 13:57:01,154 - INFO - [32/61] sub-42 completed successfully
+2025-07-20 13:57:01,156 - INFO - [33/61] Processing sub-43
+2025-07-20 15:09:33,557 - INFO - [33/61] sub-43 completed successfully
+2025-07-20 15:09:33,559 - INFO - [34/61] Processing sub-44
+2025-07-20 16:36:30,498 - INFO - [34/61] sub-44 completed successfully
+2025-07-20 16:36:30,499 - INFO - [35/61] Processing sub-45
+2025-07-20 17:46:53,182 - INFO - [35/61] sub-45 completed successfully
+2025-07-20 17:46:53,192 - INFO - [36/61] Processing sub-46
+2025-07-20 19:05:55,075 - INFO - [36/61] sub-46 completed successfully
+2025-07-20 19:05:55,084 - INFO - [37/61] Processing sub-47
+2025-07-20 20:25:44,628 - INFO - [37/61] sub-47 completed successfully
+2025-07-20 20:25:44,637 - INFO - [38/61] Processing sub-48
+2025-07-20 21:51:05,811 - INFO - [38/61] sub-48 completed successfully
+2025-07-20 21:51:05,812 - INFO - [39/61] Processing sub-49
+2025-07-20 23:07:06,361 - INFO - [39/61] sub-49 completed successfully
+2025-07-20 23:07:06,363 - INFO - [40/61] Processing sub-50
+2025-07-21 00:10:33,033 - INFO - [40/61] sub-50 completed successfully
+2025-07-21 00:10:33,034 - INFO - [41/61] Processing sub-51
+2025-07-21 01:24:06,089 - INFO - [41/61] sub-51 completed successfully
+2025-07-21 01:24:06,091 - INFO - [42/61] Processing sub-52
+2025-07-21 02:44:18,679 - INFO - [42/61] sub-52 completed successfully
+2025-07-21 02:44:18,684 - INFO - [43/61] Processing sub-53
+2025-07-21 03:56:48,357 - INFO - [43/61] sub-53 completed successfully
+2025-07-21 03:56:48,363 - INFO - [44/61] Processing sub-54
+2025-07-21 04:47:58,678 - INFO - [44/61] sub-54 completed successfully
+2025-07-21 04:47:58,681 - INFO - [45/61] Processing sub-56
+2025-07-21 06:08:55,483 - INFO - [45/61] sub-56 completed successfully
+2025-07-21 06:08:55,497 - INFO - [46/61] Processing sub-57
+2025-07-21 07:27:53,605 - INFO - [46/61] sub-57 completed successfully
+2025-07-21 07:27:53,632 - INFO - [47/61] Processing sub-58
+2025-07-21 08:29:50,148 - INFO - [47/61] sub-58 completed successfully
+2025-07-21 08:29:50,149 - INFO - [48/61] Processing sub-59
+2025-07-21 09:55:04,654 - INFO - [48/61] sub-59 completed successfully
+2025-07-21 09:55:04,656 - INFO - [49/61] Processing sub-60
+2025-07-21 11:21:06,206 - INFO - [49/61] sub-60 completed successfully
+2025-07-21 11:21:06,213 - INFO - [50/61] Processing sub-61
+2025-07-21 12:34:01,598 - INFO - [50/61] sub-61 completed successfully
+2025-07-21 12:34:01,600 - INFO - [51/61] Processing sub-62
+2025-07-21 13:56:17,526 - INFO - [51/61] sub-62 completed successfully
+2025-07-21 13:56:17,529 - INFO - [52/61] Processing sub-63
+2025-07-21 15:23:28,247 - INFO - [52/61] sub-63 completed successfully
+2025-07-21 15:23:28,253 - INFO - [53/61] Processing sub-65
+2025-07-21 16:43:55,633 - INFO - [53/61] sub-65 completed successfully
+2025-07-21 16:43:55,635 - INFO - [54/61] Processing sub-66
+2025-07-21 18:11:08,280 - INFO - [54/61] sub-66 completed successfully
+2025-07-21 18:11:08,282 - INFO - [55/61] Processing sub-67
+2025-07-21 19:38:48,502 - INFO - [55/61] sub-67 completed successfully
+2025-07-21 19:38:48,505 - INFO - [56/61] Processing sub-68
+2025-07-21 21:03:57,592 - INFO - [56/61] sub-68 completed successfully
+2025-07-21 21:03:57,597 - INFO - [57/61] Processing sub-69
+2025-07-21 21:04:35,491 - ERROR - [57/61] Error processing sub-69: trans file "/analyse/Project0407/Data/sub-69/anat/bem/sub-69-ses-1-trans.fif" not found
+2025-07-21 21:04:35,630 - INFO - [58/61] Processing sub-71
+2025-07-21 22:31:42,062 - INFO - [58/61] sub-71 completed successfully
+2025-07-21 22:31:42,063 - INFO - [59/61] Processing sub-72
+2025-07-21 23:41:30,407 - INFO - [59/61] sub-72 completed successfully
+2025-07-21 23:41:30,409 - INFO - [60/61] Processing sub-73
+2025-07-22 00:42:41,046 - INFO - [60/61] sub-73 completed successfully
+2025-07-22 00:42:41,054 - INFO - [61/61] Processing sub-74
+2025-07-22 02:07:17,584 - INFO - [61/61] sub-74 completed successfully
+2025-07-22 02:07:17,586 - INFO - ============================================================
+2025-07-22 02:07:17,587 - INFO - FINAL SUMMARY
+2025-07-22 02:07:17,587 - INFO - ============================================================
+2025-07-22 02:07:17,587 - INFO - Successfully processed: 60/61 subjects
+2025-07-22 02:07:17,587 - INFO - Failed: 1/61 subjects
+2025-07-22 02:07:17,588 - INFO - Successful subjects: sub-02, sub-04, sub-06, sub-10, sub-11, sub-13, sub-14, sub-15, sub-16, sub-18, sub-20, sub-21, sub-22, sub-23, sub-24, sub-25, sub-26, sub-27, sub-28, sub-29, sub-30, sub-31, sub-32, sub-33, sub-34, sub-35, sub-36, sub-37, sub-38, sub-39, sub-40, sub-42, sub-43, sub-44, sub-45, sub-46, sub-47, sub-48, sub-49, sub-50, sub-51, sub-52, sub-53, sub-54, sub-56, sub-57, sub-58, sub-59, sub-60, sub-61, sub-62, sub-63, sub-65, sub-66, sub-67, sub-68, sub-71, sub-72, sub-73, sub-74
+2025-07-22 02:07:17,588 - ERROR - FAILED SUBJECTS:
+2025-07-22 02:07:17,588 - ERROR -   sub-69: trans file "/analyse/Project0407/Data/sub-69/anat/bem/sub-69-ses-1-trans.fif" not found
+2025-07-22 02:07:17,588 - INFO - Detailed log saved to: /analyse/Project0407/meg_analysis/Scripts/Rest_Analyses/Cluster/source_localization_errors_20250718_183718.log

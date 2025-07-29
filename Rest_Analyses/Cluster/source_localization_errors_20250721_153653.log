@@ -1,0 +1,23 @@
+2025-07-21 15:36:53,931 - INFO - Starting source localization for 6 subjects
+2025-07-21 15:36:53,931 - INFO - Error log will be saved to: /analyse/Project0407/meg_analysis/Scripts/Rest_Analyses/Cluster/source_localization_errors_20250721_153653.log
+2025-07-21 15:36:53,931 - INFO - [1/6] Processing sub-69
+2025-07-21 15:37:10,539 - ERROR - [1/6] Error processing sub-69: fname does not exist: "/analyse/Project0407/Data/empty-room/ER_250527_raw_sss.fif"
+2025-07-21 15:37:10,555 - INFO - [2/6] Processing sub-70
+2025-07-21 16:23:06,457 - INFO - [2/6] sub-70 completed successfully
+2025-07-21 16:23:06,460 - INFO - [3/6] Processing sub-71
+2025-07-21 17:45:48,279 - INFO - [3/6] sub-71 completed successfully
+2025-07-21 17:45:48,282 - INFO - [4/6] Processing sub-72
+2025-07-21 18:49:58,366 - INFO - [4/6] sub-72 completed successfully
+2025-07-21 18:49:58,370 - INFO - [5/6] Processing sub-73
+2025-07-21 19:47:15,905 - INFO - [5/6] sub-73 completed successfully
+2025-07-21 19:47:15,908 - INFO - [6/6] Processing sub-74
+2025-07-21 21:06:28,467 - INFO - [6/6] sub-74 completed successfully
+2025-07-21 21:06:28,469 - INFO - ============================================================
+2025-07-21 21:06:28,469 - INFO - FINAL SUMMARY
+2025-07-21 21:06:28,469 - INFO - ============================================================
+2025-07-21 21:06:28,469 - INFO - Successfully processed: 5/6 subjects
+2025-07-21 21:06:28,469 - INFO - Failed: 1/6 subjects
+2025-07-21 21:06:28,470 - INFO - Successful subjects: sub-70, sub-71, sub-72, sub-73, sub-74
+2025-07-21 21:06:28,470 - ERROR - FAILED SUBJECTS:
+2025-07-21 21:06:28,471 - ERROR -   sub-69: fname does not exist: "/analyse/Project0407/Data/empty-room/ER_250527_raw_sss.fif"
+2025-07-21 21:06:28,471 - INFO - Detailed log saved to: /analyse/Project0407/meg_analysis/Scripts/Rest_Analyses/Cluster/source_localization_errors_20250721_153653.log

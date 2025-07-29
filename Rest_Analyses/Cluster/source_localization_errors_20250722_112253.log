@@ -1,0 +1,11 @@
+2025-07-22 11:22:53,294 - INFO - Starting source localization for 1 subjects
+2025-07-22 11:22:53,294 - INFO - Error log will be saved to: /analyse/Project0407/meg_analysis/Scripts/Rest_Analyses/Cluster/source_localization_errors_20250722_112253.log
+2025-07-22 11:22:53,295 - INFO - [1/1] Processing sub-69
+2025-07-22 12:32:27,931 - INFO - [1/1] sub-69 completed successfully
+2025-07-22 12:32:27,946 - INFO - ============================================================
+2025-07-22 12:32:27,946 - INFO - FINAL SUMMARY
+2025-07-22 12:32:27,946 - INFO - ============================================================
+2025-07-22 12:32:27,946 - INFO - Successfully processed: 1/1 subjects
+2025-07-22 12:32:27,946 - INFO - Failed: 0/1 subjects
+2025-07-22 12:32:27,946 - INFO - Successful subjects: sub-69
+2025-07-22 12:32:27,946 - INFO - Detailed log saved to: /analyse/Project0407/meg_analysis/Scripts/Rest_Analyses/Cluster/source_localization_errors_20250722_112253.log
